@@ -1,0 +1,3724 @@
+>>>>elm/Blockchain.elm
+# Compiled using Elchemy v0.4.37
+defmodule Blockchain do
+  use Elchemy
+
+  @type encoding :: :sha256
+
+  #  Elchemy doesn't have verify for IOData yet 
+  @spec hash(encoding, String.t) :: String.t
+  curry hash/2
+  def hash(a1, a2), do: :crypto.hash(a1, a2)
+  @spec encode(String.t) :: String.t
+  curry encode/1
+  verify as: Base.encode16/1
+  def encode(a1), do: Base.encode16(a1)
+  @spec block(integer, integer, String.t, String.t) :: %{
+    index: integer,
+    timestamp: integer,
+    data: String.t,
+    previousHash: String.t,
+    hash: String.t
+  }
+  curry block/4
+  def block(index, timestamp, data, previous_hash) do
+    [to_string().(index), to_string().(timestamp), data, previous_hash]
+    |> (XList.foldl.((&++/0).()).("")).()
+    |> (hash().(:sha256)).()
+    |> (encode()).()
+    |> ((fn(arg1) -> fn(arg2) -> fn(arg3) -> fn(arg4) -> fn(arg5) -> %{index: arg1, timestamp: arg2, data: arg3, previousHash: arg4, hash: arg5} end end end end end).(index).(timestamp).(data).(previous_hash)).()
+  end
+
+  @spec genesis(integer) :: %{
+    index: integer,
+    timestamp: integer,
+    data: String.t,
+    previousHash: String.t,
+    hash: String.t
+  }
+  curry genesis/1
+  def genesis(now) do
+    block().(0).(now).("Genesis Block").("0")
+  end
+
+  @spec new(integer, String.t, list(%{
+    index: integer,
+    timestamp: integer,
+    data: String.t,
+    previousHash: String.t,
+    hash: String.t
+  })) :: list(%{
+    index: integer,
+    timestamp: integer,
+    data: String.t,
+    previousHash: String.t,
+    hash: String.t
+  })
+  curry new/3
+  def new(now, data, list) do
+    case list do
+      [] ->
+        g = genesis().(now)
+        [block().((g.index + 1)).(now).(data).(g.hash) | [g]]
+      [x | xs] ->
+        [block().((x.index + 1)).(now).(data).(x.hash) | [x | xs]]
+    end
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XBasics.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XBasics do
+  use Elchemy
+
+  @moduledoc """
+  Tons of useful functions that get imported by default.
+  @docs compare, xor, sqrt, clamp, compare , xor , negate , sqrt , logBase , e , pi , cos , sin , tan , acos , asin , atan , atan2 , round , floor , ceiling , truncate , toFloat , toString , (++) , identity , always, flip, tuple2, tuple3, tuple4, tuple5
+  
+  @docs Order
+  
+  
+  """
+  @typedoc """
+  Represents the relative ordering of two things.
+  The relations are less than, equal to, and greater than.
+  
+  """
+  @type order :: :lt | :eq | :gt
+
+
+
+  import Kernel, except: [
+  {:'++', 2},
+  {:round, 1},
+  {:to_string, 1}
+
+  ]
+
+  curry ==/2
+  curry !=/2
+  curry </2
+  curry >/2
+  curry <=/2
+  curry >=/2
+  curry max/2
+  curry min/2
+
+  curry &&/2
+  curry ||/2
+
+  curry +/2
+  curry -/2
+  curry */2
+  curry //2
+  curry div/2
+  curry rem/2
+  curry abs/1
+  # Inlined from not
+  curry !/1
+
+
+  @doc """
+  Basic compare function
+  
+  
+  ### Example
+  
+      iex> import Elchemy.XBasics
+      iex> compare().(1).(2)
+      :lt
+
+  
+  
+  """
+  @spec compare(any, any) :: order
+  curry compare/2
+  def compare(a, b) do
+    cond do
+      (a > b) -> :gt
+      (a < b) -> :lt
+      true -> :eq
+    end
+  end
+
+
+  # >> is replaced with >>> by the compiler
+  def l >>> r do
+  fn x -> r.(l.(x)) end
+  end
+
+
+  @doc """
+  The exclusive-or operator. `True` if exactly one input is `True`.
+  
+  """
+  @spec xor(boolean, boolean) :: boolean
+  curry xor/2
+  def xor(a, b) do
+    ((a && (&!/0).().(b)) || ((&!/0).().(a) && b))
+  end
+
+  @doc """
+  Negate a number.
+  
+      iex> import Elchemy.XBasics
+      iex> negate().(42)
+      -42
+
+      iex> import Elchemy.XBasics
+      iex> negate().(-42)
+      42
+
+      iex> import Elchemy.XBasics
+      iex> negate().(0)
+      0
+
+  
+  
+  """
+  @spec negate(number) :: number
+  curry negate/1
+  verify as: Kernel.-/1
+  def negate(a1), do: Kernel.-(a1)
+  @doc """
+  Take the square root of a number.
+  
+  """
+  @spec sqrt(number) :: float
+  curry sqrt/1
+  verify as: :math.sqrt/1
+  def sqrt(a1), do: :math.sqrt(a1)
+  @doc """
+  Clamps a number within a given range. With the expression
+  `clamp 100 200 x` the results are as follows:
+  100 if x < 100
+  x if 100 <= x < 200
+  200 if 200 <= x
+  
+  """
+  @spec clamp(any, any, any) :: any
+  curry clamp/3
+  def clamp(x, bottom, top) do
+    x
+    |> (min().(bottom)).()
+    |> (max().(top)).()
+  end
+
+  @doc """
+  
+  """
+  @spec log_base(float, float) :: float
+  curry log_base/2
+  def log_base(_, _) do
+    not_implemented()
+  end
+
+  @doc """
+  
+  """
+  @spec e() :: float
+  def e() do
+    2.71828
+  end
+
+  @doc """
+  
+  """
+  @spec pi() :: float
+  verify as: :math.pi/0
+  def pi(), do: :math.pi()
+  @doc """
+  
+  """
+  @spec cos(float) :: float
+  curry cos/1
+  verify as: :math.cos/1
+  def cos(a1), do: :math.cos(a1)
+  @doc """
+  
+  """
+  @spec sin(float) :: float
+  curry sin/1
+  verify as: :math.sin/1
+  def sin(a1), do: :math.sin(a1)
+  @doc """
+  
+  """
+  @spec tan(float) :: float
+  curry tan/1
+  verify as: :math.tan/1
+  def tan(a1), do: :math.tan(a1)
+  @doc """
+  
+  """
+  @spec acos(float) :: float
+  curry acos/1
+  verify as: :math.acos/1
+  def acos(a1), do: :math.acos(a1)
+  @doc """
+  
+  """
+  @spec asin(float) :: float
+  curry asin/1
+  verify as: :math.asin/1
+  def asin(a1), do: :math.asin(a1)
+  @doc """
+  
+  """
+  @spec atan(float) :: float
+  curry atan/1
+  verify as: :math.atan/1
+  def atan(a1), do: :math.atan(a1)
+  @doc """
+  
+  """
+  @spec atan2(float, float) :: float
+  curry atan2/2
+  verify as: :math.atan2/2
+  def atan2(a1, a2), do: :math.atan2(a1, a2)
+  @doc """
+  
+  """
+  @spec round(float) :: integer
+  curry round/1
+  verify as: Kernel.round/1
+  def round(a1), do: Kernel.round(a1)
+  @doc """
+  
+  """
+  @spec floor(float) :: integer
+  curry floor/1
+  def floor(a1), do: Float.floor(a1)
+  @doc """
+  
+  """
+  @spec ceiling(float) :: integer
+  curry ceiling/1
+  def ceiling(a1), do: Float.ceil(a1)
+  @doc """
+  Truncate a number, rounding towards zero.
+  
+  """
+  @spec truncate(float) :: integer
+  curry truncate/1
+  def truncate(_) do
+    not_implemented()
+  end
+
+  @doc """
+  Convert an integer into a float.
+  
+  """
+  @spec to_float(integer) :: float
+  curry to_float/1
+  def to_float(x) do
+    mul_().(x).(1.0)
+  end
+
+  @spec mul_(integer, float) :: float
+  curryp mul_/2
+  verify as: Kernel.*/2
+  defp mul_(a1, a2), do: Kernel.*(a1, a2)
+  @doc """
+  Turn any kind of value into a string. When you view the resulting string
+  with `Text.fromString` it should look just like the value it came from.
+  
+      iex> import Elchemy.XBasics
+      iex> to_string().(42)
+      "42"
+
+      iex> import Elchemy.XBasics
+      iex> to_string().([1, 2])
+      "[1, 2]"
+
+  
+  
+  """
+  @spec to_string(any) :: String.t
+  curry to_string/1
+  def to_string(a) do
+    inspect_().(a).([])
+  end
+
+  @type binaries_as :: :as_binaries | :as_strings
+
+  @type inspect_option :: {:structs, boolean} | {:binaries, binaries_as}
+
+  @spec inspect_(any, list(inspect_option)) :: String.t
+  curryp inspect_/2
+  verify as: Kernel.inspect/2
+  defp inspect_(a1, a2), do: Kernel.inspect(a1, a2)
+  @doc """
+  Put two appendable things together. This includes strings, lists, and text.
+  
+      iex> import Elchemy.XBasics
+      iex> ("hello" ++ "world")
+      "helloworld"
+
+      iex> import Elchemy.XBasics
+      iex> ([1, 1, 2] ++ [3, 5, 8])
+      [1, 1, 2, 3, 5, 8]
+
+  
+  
+  """
+  curry ++/2
+  def a ++ b do
+    if (is_binary_().(a) && is_binary_().(b)) do add_strings_().(a).(b) else add_lists_().(a).(b) end
+  end
+
+  @spec is_binary_(any) :: boolean
+  curryp is_binary_/1
+  verify as: Kernel.is_binary/1
+  defp is_binary_(a1), do: Kernel.is_binary(a1)
+  @spec add_strings_(any, any) :: any
+  curryp add_strings_/2
+  defp add_strings_(a1, a2), do: Kernel.<>(a1, a2)
+  @spec add_lists_(any, any) :: any
+  curryp add_lists_/2
+  defp add_lists_(a1, a2), do: Kernel.++(a1, a2)
+  @doc """
+  Given a value, returns exactly the same value. This is called
+  [the identity function](http://en.wikipedia.org/wiki/Identity_function).
+  
+  """
+  @spec identity(any) :: any
+  curry identity/1
+  def identity(a) do
+    a
+  end
+
+  @doc """
+  Create a function that *always* returns the same value. Useful with
+  functions like `map`:
+  
+      iex> import Elchemy.XBasics
+      iex> XList.map.(always().(0)).([1, 2, 3, 4, 5])
+      [0, 0, 0, 0, 0]
+
+      iex> import Elchemy.XBasics
+      iex> XList.map.(fn(_) -> 0 end).([1, 2, 3, 4, 5])
+      [0, 0, 0, 0, 0]
+
+  
+  
+  """
+  @spec always(any, any) :: any
+  curry always/2
+  def always(a, _) do
+    a
+  end
+
+  @doc """
+  Flip the order of the first two arguments to a function.
+  
+  """
+  @spec flip((any -> (any -> any)), any, any) :: any
+  curry flip/3
+  def flip(f, a, b) do
+    f.(b).(a)
+  end
+
+
+  @spec curried(({any, any} -> any)) :: ((any -> any) -> any)
+  curry curried/1
+  def curried(fun) do
+  fn fst -> fn snd -> fun.({fst, snd}) end end
+  end
+
+  @spec uncurried(((any -> any) -> any)) :: ({any, any} -> any)
+  curry uncurried/1
+  def uncurried(fun) do
+  fn {fst, snd} -> fun.(fst).(snd) end
+  end
+
+
+  #  Additional
+  @spec not_implemented() :: any
+  defp not_implemented() do
+    _ = throw_().("Not implemented")
+    XDebug.crash.("a")
+  end
+
+  @spec throw_(String.t) :: no_return
+  curryp throw_/1
+  verify as: Kernel.throw/1
+  defp throw_(a1), do: Kernel.throw(a1)
+  @doc """
+  
+  """
+  @spec tuple2(any, any) :: {any, any}
+  curry tuple2/2
+  def tuple2(a, b) do
+    {a, b}
+  end
+
+  @doc """
+  
+  """
+  @spec tuple3(any, any, any) :: {any, any, any}
+  curry tuple3/3
+  def tuple3(a, b, c) do
+    {a, b, c}
+  end
+
+  @doc """
+  
+  """
+  @spec tuple4(any, any, any, any) :: {any, any, any, any}
+  curry tuple4/4
+  def tuple4(a, b, c, d) do
+    {a, b, c, d}
+  end
+
+  @doc """
+  
+  """
+  @spec tuple5(any, any, any, any, any) :: {any, any, any, any, any}
+  curry tuple5/5
+  def tuple5(a, b, c, d, e) do
+    {a, b, c, d, e}
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XChar.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XChar do
+  use Elchemy
+
+  @moduledoc """
+  Functions for working with characters. Character literals are enclosed in
+  `'a'` pair of single quotes.
+  
+  
+  # Classification
+  
+  @docs isUpper, isLower, isDigit, isOctDigit, isHexDigit
+  
+  
+  # Conversion
+  
+  @docs toUpper, toLower
+  
+  
+  # Key Codes
+  
+  @docs KeyCode, toCode, fromCode
+  
+  
+  """
+  import XBasics, only: [{:'+', 0}]
+  @spec is_between(integer, integer, integer) :: boolean
+  curryp is_between/3
+  defp is_between(low, high, char) do
+    code = to_code().(char)
+    ((code >= to_code().(low)) && (code <= to_code().(high)))
+  end
+
+  @doc """
+  True for upper case ASCII letters.
+  
+      iex> import Elchemy.XChar
+      iex> is_upper().(?D)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_upper().(?A)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_upper().(?x)
+      :false
+
+  
+  
+  """
+  @spec is_upper(integer) :: boolean
+  curry is_upper/1
+  def is_upper(char) do
+    is_between().(?A).(?Z).(char)
+  end
+
+  @doc """
+  True for lower case ASCII letters.
+  
+      iex> import Elchemy.XChar
+      iex> is_lower().(?d)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_lower().(?a)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_lower().(?X)
+      :false
+
+  
+  
+  """
+  @spec is_lower(integer) :: boolean
+  curry is_lower/1
+  def is_lower(char) do
+    is_between().(?a).(?z).(char)
+  end
+
+  @doc """
+  True for ASCII digits `[0-9]`.
+  
+      iex> import Elchemy.XChar
+      iex> is_digit().(?1)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_digit().(?9)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_digit().(?a)
+      :false
+
+  
+  
+  """
+  @spec is_digit(integer) :: boolean
+  curry is_digit/1
+  def is_digit(char) do
+    is_between().(?0).(?9).(char)
+  end
+
+  @doc """
+  True for ASCII octal digits `[0-7]`.
+  
+      iex> import Elchemy.XChar
+      iex> is_oct_digit().(?7)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_oct_digit().(?5)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_oct_digit().(?9)
+      :false
+
+  
+  
+  """
+  @spec is_oct_digit(integer) :: boolean
+  curry is_oct_digit/1
+  def is_oct_digit(char) do
+    is_between().(?0).(?7).(char)
+  end
+
+  @doc """
+  True for ASCII hexadecimal digits `[0-9a-fA-F]`.
+  
+      iex> import Elchemy.XChar
+      iex> is_hex_digit().(?d)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_hex_digit().(?D)
+      :true
+
+      iex> import Elchemy.XChar
+      iex> is_hex_digit().(?x)
+      :false
+
+  
+  
+  """
+  @spec is_hex_digit(integer) :: boolean
+  curry is_hex_digit/1
+  def is_hex_digit(char) do
+    ((is_digit().(char) || is_between().(?a).(?f).(char)) || is_between().(?A).(?F).(char))
+  end
+
+  @doc """
+  Convert to upper case.
+  
+      iex> import Elchemy.XChar
+      iex> to_upper().(?a)
+      ?A
+
+  
+  
+  """
+  @spec to_upper(integer) :: integer
+  curry to_upper/1
+  def to_upper(char) do
+    if is_between().(?a).(?z).(char) do to_code().(char)
+    |> ((&+/0).().(-32)).()
+    |> (from_code()).() else char end
+  end
+
+  @doc """
+  Convert to lower case.
+  
+      iex> import Elchemy.XChar
+      iex> to_lower().(?A)
+      ?a
+
+  
+  
+  """
+  @spec to_lower(integer) :: integer
+  curry to_lower/1
+  def to_lower(char) do
+    if is_between().(?A).(?Z).(char) do to_code().(char)
+    |> ((&+/0).().(32)).()
+    |> (from_code()).() else char end
+  end
+
+  #  toLocaleUpper : Char -> Char--   Native.Char.toLocaleUpper-- toLocaleLower : Char -> Char--   Native.Char.toLocaleLower
+  @doc """
+  Convert to key code.
+  
+      iex> import Elchemy.XChar
+      iex> to_code().(?a)
+      97
+
+  
+  
+  """
+  @spec to_code(integer) :: integer
+  curry to_code/1
+  def to_code(char) do
+    naive_id1().(char).(0)
+  end
+
+  @doc """
+  Convert from key code.
+  
+      iex> import Elchemy.XChar
+      iex> from_code().(97)
+      ?a
+
+  
+  
+  """
+  @spec from_code(integer) :: integer
+  curry from_code/1
+  def from_code(code) do
+    naive_id2().(code).(0)
+  end
+
+  @spec naive_id1(integer, integer) :: integer
+  curryp naive_id1/2
+  verify as: Kernel.+/2
+  defp naive_id1(a1, a2), do: Kernel.+(a1, a2)
+  @spec naive_id2(integer, integer) :: integer
+  curryp naive_id2/2
+  verify as: Kernel.+/2
+  defp naive_id2(a1, a2), do: Kernel.+(a1, a2)
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XDebug.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XDebug do
+  use Elchemy
+
+  @moduledoc """
+  Module with helper functions for debugging
+  
+  
+  # Debug
+  
+  @docs log, crash
+  
+  
+  """
+  @doc """
+  Log to console in `title: object` format
+  
+  """
+  @spec log(String.t, any) :: any
+  curry log/2
+  def log(title, a) do
+    _ = puts_().("#{title}:#{inspect a}").([])
+    a
+  end
+
+  @spec puts_(any, list({any, any})) :: any
+  curryp puts_/2
+  verify as: IO.puts/2
+  defp puts_(a1, a2), do: IO.puts(a1, a2)
+  #  We don't verify since it's a macro 
+  @doc """
+  Raise an exception to crash the runtime. Should be avoided at all
+  costs. Helpful for crashing at not yet implelented functionality
+  
+  """
+  @spec crash(String.t) :: any
+  curry crash/1
+  def crash(a1), do: Kernel.raise(a1)
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XDict.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XDict do
+  use Elchemy
+
+  @moduledoc """
+  A dictionary mapping unique keys to values. The keys can be any comparable
+  type. This includes `Int`, `Float`, `Time`, `Char`, `String`, and tuples or
+  lists of comparable types.
+  
+  Insert, remove, and query operations all take *O(log n)* time.
+  
+  
+  # Dictionaries
+  
+  @docs Dict
+  
+  
+  # Build
+  
+  @docs empty, singleton, insert, update, remove
+  
+  
+  # Query
+  
+  @docs isEmpty, member, get, size
+  
+  
+  # Lists
+  
+  @docs keys, values, toList, fromList
+  
+  
+  # Transform
+  
+  @docs map, foldl, foldr, filter, partition
+  
+  
+  # Combine
+  
+  @docs union, intersect, diff, merge
+  
+  
+  """
+  @typedoc """
+  A dictionary of keys and values. So a `(Dict String User)` is a dictionary
+  that lets you look up a `String` (such as user names) and find the associated
+  `User`.
+  
+  """
+  @type dict :: :dict
+
+  @doc """
+  Create an empty dictionary.
+  
+  """
+  @spec empty() :: %{}
+  verify as: NativeDict.empty/0
+  def empty(), do: NativeDict.empty()
+  @doc """
+  Get the value associated with a key. If the key is not found, return
+  `Nothing`. This is useful when you are not sure if a key will be in the
+  dictionary.
+  
+      iex> import Elchemy.XDict
+      iex> get().("Tom").(from_list().([{"Tom", :cat}, {"Jerry", :mouse}]))
+      {:cat}
+
+      iex> import Elchemy.XDict
+      iex> get().("Jerry").(from_list().([{"Tom", :cat}, {"Jerry", :mouse}]))
+      {:mouse}
+
+      iex> import Elchemy.XDict
+      iex> get().("Spike").(from_list().([{"Tom", :cat}, {"Jerry", :mouse}]))
+      nil
+
+  
+  
+  """
+  @spec get(any, %{}) :: {any} | nil
+  curry get/2
+  verify as: NativeDict.get/2
+  def get(a1, a2), do: NativeDict.get(a1, a2)
+  @doc """
+  Determine if a key is in a dictionary.
+  
+  """
+  @spec member(any, %{}) :: boolean
+  curry member/2
+  def member(key, dict) do
+    case get().(key).(dict) do
+      {_} ->
+        :true
+      nil ->
+        :false
+    end
+  end
+
+  @doc """
+  Determine the number of key-value pairs in the dictionary.
+  
+      iex> import Elchemy.XDict
+      iex> size().(from_list().([{"a", 1}, {"b", 2}]))
+      2
+
+  
+  
+  """
+  @spec size(%{}) :: integer
+  curry size/1
+  verify as: NativeDict.size/1
+  def size(a1), do: NativeDict.size(a1)
+  @doc """
+  Determine if a dictionary is empty.
+  
+      iex> import Elchemy.XDict
+      iex> is_empty().(empty())
+      :true
+
+  
+  
+  """
+  @spec is_empty(%{}) :: boolean
+  curry is_empty/1
+  def is_empty(dict) do
+    (dict == empty())
+  end
+
+  @doc """
+  Insert a key-value pair into a dictionary. Replaces value when there is
+  a collision.
+  
+      iex> import Elchemy.XDict
+      iex> (insert().("a").(1).(empty()) == from_list().([{"a", 1}]))
+      :true
+
+  
+  
+  """
+  @spec insert(any, any, %{}) :: %{}
+  curry insert/3
+  verify as: NativeDict.insert/3
+  def insert(a1, a2, a3), do: NativeDict.insert(a1, a2, a3)
+  @doc """
+  Remove a key-value pair from a dictionary. If the key is not found,
+  no changes are made.
+  
+      iex> import Elchemy.XDict
+      iex> is_empty().(remove().("a").(from_list().([{"a", 1}])))
+      :true
+
+  
+  
+  """
+  @spec remove(any, %{}) :: %{}
+  curry remove/2
+  verify as: NativeDict.remove/2
+  def remove(a1, a2), do: NativeDict.remove(a1, a2)
+  @doc """
+  Update the value of a dictionary for a specific key with a given function.
+  
+      iex> import Elchemy.XDict
+      iex> (update().("a").(fn(_) -> {2} end).(from_list().([{"a", 1}])) == from_list().([{"a", 2}]))
+      :true
+
+  
+  
+  """
+  @spec update(any, ({any} | nil -> {any} | nil), %{}) :: %{}
+  curry update/3
+  verify as: NativeDict.update/3
+  def update(a1, a2, a3), do: NativeDict.update(a1, fn (x1) -> a2.(x1) end, a3)
+  @doc """
+  Create a dictionary with one key-value pair.
+  
+  """
+  @spec singleton(any, any) :: %{}
+  curry singleton/2
+  def singleton(key, value) do
+    insert().(key).(value).(empty())
+  end
+
+  @doc """
+  Combine two dictionaries. If there is a collision, preference is given
+  to the first dictionary.
+  
+  """
+  @spec union(%{}, %{}) :: %{}
+  curry union/2
+  def union(t1, t2) do
+    foldl().(insert()).(t2).(t1)
+  end
+
+  @doc """
+  Keep a key-value pair when its key appears in the second dictionary.
+  Preference is given to values in the first dictionary.
+  
+  """
+  @spec intersect(%{}, %{}) :: %{}
+  curry intersect/2
+  def intersect(t1, t2) do
+    filter().(fn(k) -> fn(_) -> member().(k).(t2) end end).(t1)
+  end
+
+  @doc """
+  Keep a key-value pair when its key does not appear in the second dictionary.
+  
+  """
+  @spec diff(%{}, %{}) :: %{}
+  curry diff/2
+  def diff(t1, t2) do
+    foldl().(fn(k) -> fn(_) -> fn(t) -> remove().(k).(t) end end end).(t1).(t2)
+  end
+
+  @doc """
+  The most general way of combining two dictionaries. You provide three
+  accumulators for when a given key appears:
+  
+  1.  Only in the left dictionary.
+  2.  In both dictionaries.
+  3.  Only in the right dictionary.
+  
+  You then traverse all the keys from lowest to highest, building up whatever
+  you want.
+  
+      iex> import Elchemy.XDict
+      iex> (merge().(insert()).(flip().(always().(insert()))).(insert()).(from_list().([{"a", 1}, {"b", 2}])).(from_list().([{"b", 3}, {"c", 4}])).(empty()) == from_list().([{"a", 1}, {"b", 3}, {"c", 4}]))
+      :true
+
+  
+  
+  """
+  @spec merge((any -> (any -> (any -> any))), (any -> (any -> (any -> (any -> any)))), (any -> (any -> (any -> any))), %{}, %{}, any) :: any
+  curry merge/6
+  verify as: NativeDict.merge/6
+  def merge(a1, a2, a3, a4, a5, a6), do: NativeDict.merge(fn (x1,x2,x3) -> a1.(x1).(x2).(x3) end, fn (x1,x2,x3,x4) -> a2.(x1).(x2).(x3).(x4) end, fn (x1,x2,x3) -> a3.(x1).(x2).(x3) end, a4, a5, a6)
+  @doc """
+  Apply a function to all values in a dictionary.
+  
+  """
+  @spec map((any -> (any -> any)), %{}) :: %{}
+  curry map/2
+  verify as: NativeDict.map/2
+  def map(a1, a2), do: NativeDict.map(fn (x1,x2) -> a1.(x1).(x2) end, a2)
+  @doc """
+  Fold over the key-value pairs in a dictionary, in order from lowest
+  key to highest key.
+  
+  """
+  @spec foldl((any -> (any -> (any -> any))), any, %{}) :: any
+  curry foldl/3
+  verify as: NativeDict.foldl/3
+  def foldl(a1, a2, a3), do: NativeDict.foldl(fn (x1,x2,x3) -> a1.(x1).(x2).(x3) end, a2, a3)
+  @doc """
+  Fold over the key-value pairs in a dictionary, in order from highest
+  key to lowest key.
+  
+  """
+  @spec foldr((any -> (any -> (any -> any))), any, %{}) :: any
+  curry foldr/3
+  verify as: NativeDict.foldr/3
+  def foldr(a1, a2, a3), do: NativeDict.foldr(fn (x1,x2,x3) -> a1.(x1).(x2).(x3) end, a2, a3)
+  @doc """
+  Keep a key-value pair when it satisfies a predicate.
+  
+  """
+  @spec filter((any -> (any -> boolean)), %{}) :: %{}
+  curry filter/2
+  def filter(predicate, dictionary) do
+    add = fn(key) -> fn(value) -> fn(dict) -> if predicate.(key).(value) do insert().(key).(value).(dict) else dict end end end end
+    foldl().(add).(empty()).(dictionary)
+  end
+
+  @doc """
+  Partition a dictionary according to a predicate. The first dictionary
+  contains all key-value pairs which satisfy the predicate, and the second
+  contains the rest.
+  
+  """
+  @spec partition((any -> (any -> boolean)), %{}) :: {%{}, %{}}
+  curry partition/2
+  def partition(predicate, dict) do
+    add = fn(key) -> fn(value) -> fn({t1, t2}) -> if predicate.(key).(value) do {insert().(key).(value).(t1), t2} else {t1, insert().(key).(value).(t2)} end end end end
+    foldl().(add).({empty(), empty()}).(dict)
+  end
+
+  @doc """
+  Get all of the keys in a dictionary, sorted from lowest to highest.
+  
+      iex> import Elchemy.XDict
+      iex> keys().(from_list().([{0, "Alice"}, {1, "Bob"}]))
+      [0, 1]
+
+  
+  
+  """
+  @spec keys(%{}) :: list(any)
+  curry keys/1
+  def keys(dict) do
+    foldr().(fn(key) -> fn(_) -> fn(key_list) -> [key | key_list] end end end).([]).(dict)
+  end
+
+  @doc """
+  Get all of the values in a dictionary, in the order of their keys.
+  
+      iex> import Elchemy.XDict
+      iex> values().(from_list().([{0, "Alice"}, {1, "Bob"}]))
+      ["Alice", "Bob"]
+
+  
+  
+  """
+  @spec values(%{}) :: list(any)
+  curry values/1
+  def values(dict) do
+    foldr().(fn(_) -> fn(value) -> fn(value_list) -> [value | value_list] end end end).([]).(dict)
+  end
+
+  @doc """
+  Convert a dictionary into an association list of key-value pairs, sorted by keys.
+  
+  """
+  @spec to_list(%{}) :: list({any, any})
+  curry to_list/1
+  def to_list(dict) do
+    foldr().(fn(key) -> fn(value) -> fn(list) -> [{key, value} | list] end end end).([]).(dict)
+  end
+
+  @doc """
+  Convert an association list into a dictionary.
+  
+  """
+  @spec from_list(list({any, any})) :: %{}
+  curry from_list/1
+  def from_list(assocs) do
+    XList.foldl.(fn({key, value}) -> fn(dict) -> insert().(key).(value).(dict) end end).(empty()).(assocs)
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XList.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XList do
+  use Elchemy
+
+  @moduledoc """
+  A library for manipulating lists of values. Every value in a
+  list must have the same type.
+  
+  
+  # Basics
+  
+  @docs isEmpty, length, reverse, member
+  
+  
+  # Sub-lists
+  
+  @docs head, tail, filter, take, drop
+  
+  
+  # Putting Lists Together
+  
+  @docs singleton, repeat, range, cons, (::), append, concat, intersperse
+  
+  
+  # Taking Lists Apart
+  
+  @docs partition, unzip
+  
+  
+  # Mapping
+  
+  @docs map, map2
+  
+  If you can think of a legitimate use of `mapN` where `N` is 6 or more, please
+  let us know on [the list](https://groups.google.com/forum/#!forum/elm-discuss).
+  The current sentiment is that it is already quite error prone once you get to
+  4 and possibly should be approached another way.
+  
+  
+  # Special Maps
+  
+  @docs filterMap, concatMap, indexedMap
+  
+  
+  # Folding
+  
+  @docs foldr, foldl
+  
+  
+  # Special Folds
+  
+  @docs sum, product, maximum, minimum, all, any, scanl
+  
+  
+  # Sorting
+  
+  @docs sort, sortBy, sortWith
+  
+  
+  """
+
+  import Kernel, except: [{:length, 1}]
+  import Elchemy.XBasics
+
+  @doc """
+  Add an element to the front of a list. Pronounced *cons*.
+  
+      iex> import Elchemy.XList
+      iex> cons().(1).([2, 3])
+      [1, 2, 3]
+
+      iex> import Elchemy.XList
+      iex> cons().(1).([])
+      [1]
+
+  
+  
+  """
+  @spec cons(any, list(any)) :: list(any)
+  curry cons/2
+  def cons(a, list) do
+    [a | list]
+  end
+
+  @doc """
+  Extract the first element of a list.
+  
+      iex> import Elchemy.XList
+      iex> head().([1, 2, 3])
+      {1}
+
+      iex> import Elchemy.XList
+      iex> head().([])
+      nil
+
+  
+  
+  """
+  @spec head(list(any)) :: {any} | nil
+  curry head/1
+  def head([x | _]) do
+    {x}
+  end
+  def head([]) do
+    nil
+  end
+
+  @doc """
+  Extract the rest of the list.
+  
+      iex> import Elchemy.XList
+      iex> tail().([1, 2, 3])
+      {[2, 3]}
+
+      iex> import Elchemy.XList
+      iex> tail().([])
+      nil
+
+  
+  
+  """
+  @spec tail(list(any)) :: {list(any)} | nil
+  curry tail/1
+  def tail([_ | xs]) do
+    {xs}
+  end
+  def tail([]) do
+    nil
+  end
+
+  @doc """
+  Determine if a list is empty.
+  
+      iex> import Elchemy.XList
+      iex> is_empty().([])
+      :true
+
+  
+  
+  """
+  @spec is_empty(list(any)) :: boolean
+  curry is_empty/1
+  def is_empty([]) do
+    :true
+  end
+  def is_empty(_) do
+    :false
+  end
+
+  @doc """
+  Figure out whether a list contains a value.
+  
+      iex> import Elchemy.XList
+      iex> member().(9).([1, 2, 3, 4])
+      :false
+
+      iex> import Elchemy.XList
+      iex> member().(4).([1, 2, 3, 4])
+      :true
+
+  
+  
+  """
+  @spec member(any, list(any)) :: boolean
+  curry member/2
+  def member(x, xs) do
+    any().(fn(a) -> (a == x) end).(xs)
+  end
+
+  @doc """
+  Apply a function to every element of a list.
+  
+      iex> import Elchemy.XList
+      iex> map().(sqrt()).([1, 4, 9])
+      [1.0, 2.0, 3.0]
+
+  
+      iex> import Elchemy.XList
+      iex> map().((&!/0).()).([:true, :false, :true])
+      [:false, :true, :false]
+
+  
+  
+  """
+  @spec map((any -> any), list(any)) :: list(any)
+  curry map/2
+  def map(f, xs) do
+    foldr().(fn(x) -> fn(acc) -> [f.(x) | acc] end end).([]).(xs)
+  end
+
+  @doc """
+  Same as `map` but the function is also applied to the index of each
+  element (starting at zero).
+  
+      iex> import Elchemy.XList
+      iex> indexed_map().((&tuple2/0).()).(["Tom", "Sue", "Bob"])
+      [{0, "Tom"}, {1, "Sue"}, {2, "Bob"}]
+
+  
+  
+  """
+  @spec indexed_map((integer -> (any -> any)), list(any)) :: list(any)
+  curry indexed_map/2
+  def indexed_map(f, xs) do
+    map2().(f).(range().(0).((length().(xs) - 1))).(xs)
+  end
+
+  @doc """
+  Reduce a list from the left.
+  
+      iex> import Elchemy.XList
+      iex> foldl().((&cons/0).()).([]).([1, 2, 3])
+      [3, 2, 1]
+
+  
+  
+  """
+  @spec foldl((any -> (any -> any)), any, list(any)) :: any
+  curry foldl/3
+  def foldl(func, acc, list) do
+    case list do
+      [] ->
+        acc
+      [x | xs] ->
+        foldl().(func).(func.(x).(acc)).(xs)
+    end
+  end
+
+  @doc """
+  Reduce a list from the right.
+  
+      iex> import Elchemy.XList
+      iex> foldr().((&+/0).()).(0).([1, 2, 3])
+      6
+
+  
+  
+  """
+  @spec foldr((any -> (any -> any)), any, list(any)) :: any
+  curry foldr/3
+  def foldr(f, start, list) do
+    foldr_().(list).(start).(f)
+  end
+
+  @spec foldr_(list(any), any, (any -> (any -> any))) :: any
+  curryp foldr_/3
+  verify as: List.foldr/3
+  defp foldr_(a1, a2, a3), do: List.foldr(a1, a2, fn (x1,x2) -> a3.(x1).(x2) end)
+  @doc """
+  Reduce a list from the left, building up all of the intermediate results into a list.
+  
+      iex> import Elchemy.XList
+      iex> scanl().((&+/0).()).(0).([1, 2, 3, 4])
+      [0, 1, 3, 6, 10]
+
+  
+  
+  """
+  @spec scanl((any -> (any -> any)), any, list(any)) :: list(any)
+  curry scanl/3
+  def scanl(f, b, xs) do
+    scan1 = fn(x) -> fn(acc_acc) -> case acc_acc do
+      [acc | _] ->
+        [f.(x).(acc) | acc_acc]
+      [] ->
+        []
+    end end end
+    reverse().(foldl().(scan1).([b]).(xs))
+  end
+
+  @doc """
+  Keep only elements that satisfy the predicate.
+  
+      iex> import Elchemy.XList
+      iex> filter().((flip().((&rem/0).()).(2) >>> (&==/0).().(0))).([1, 2, 3, 4, 5, 6])
+      [2, 4, 6]
+
+  
+  
+  """
+  @spec filter((any -> boolean), list(any)) :: list(any)
+  curry filter/2
+  def filter(pred, xs) do
+    conditional_cons = fn(front) -> fn(back) -> if pred.(front) do [front | back] else back end end end
+    foldr().(conditional_cons).([]).(xs)
+  end
+
+  @doc """
+  Apply a function that may succeed to all values in the list, but only keep
+  the successes.
+  
+      iex> import Elchemy.XList
+      iex> filter_map().(fn(a) -> if (a >= 18) do {a} else nil end end).([3, 15, 12, 18, 24])
+      [18, 24]
+
+  
+  
+  """
+  @spec filter_map((any -> {any} | nil), list(any)) :: list(any)
+  curry filter_map/2
+  def filter_map(f, xs) do
+    foldr().(maybe_cons().(f)).([]).(xs)
+  end
+
+  @spec maybe_cons((any -> {any} | nil), any, list(any)) :: list(any)
+  curryp maybe_cons/3
+  defp maybe_cons(f, mx, xs) do
+    case f.(mx) do
+      {x} ->
+        [x | xs]
+      nil ->
+        xs
+    end
+  end
+
+  @doc """
+  Determine the length of a list.
+  
+      iex> import Elchemy.XList
+      iex> length().([1, 2, 3])
+      3
+
+  
+  
+  """
+  @spec length(list(any)) :: integer
+  curry length/1
+  def length(xs) do
+    foldl().(fn(_) -> fn(i) -> (i + 1) end end).(0).(xs)
+  end
+
+  @doc """
+  Reverse a list.
+  
+      iex> import Elchemy.XList
+      iex> reverse().([1, 2, 3, 4])
+      [4, 3, 2, 1]
+
+  
+  
+  """
+  @spec reverse(list(any)) :: list(any)
+  curry reverse/1
+  def reverse(list) do
+    foldl().((&cons/0).()).([]).(list)
+  end
+
+  @doc """
+  Determine if all elements satisfy the predicate.
+  
+      iex> import Elchemy.XList
+      iex> all().(fn(a) -> (rem(a, 2) == 0) end).([2, 4])
+      :true
+
+      iex> import Elchemy.XList
+      iex> all().(fn(a) -> (rem(a, 2) == 0) end).([2, 3])
+      :false
+
+      iex> import Elchemy.XList
+      iex> all().(fn(a) -> (rem(a, 2) == 0) end).([])
+      :true
+
+  
+  
+  """
+  @spec all((any -> boolean), list(any)) :: boolean
+  curry all/2
+  def all(is_okay, list) do
+    (&!/0).().(any().((is_okay >>> (&!/0).())).(list))
+  end
+
+  @doc """
+  Determine if any elements satisfy the predicate.
+  
+      iex> import Elchemy.XList
+      iex> any().(fn(a) -> (rem(a, 2) == 0) end).([2, 3])
+      :true
+
+      iex> import Elchemy.XList
+      iex> any().(fn(a) -> (rem(a, 2) == 0) end).([1, 3])
+      :false
+
+      iex> import Elchemy.XList
+      iex> any().(fn(a) -> (rem(a, 2) == 0) end).([])
+      :false
+
+  
+  
+  """
+  @spec any((any -> boolean), list(any)) :: boolean
+  curry any/2
+  def any(is_okay, list) do
+    case list do
+      [] ->
+        :false
+      [x | xs] ->
+        if is_okay.(x) do :true else any().(is_okay).(xs) end
+    end
+  end
+
+  @doc """
+  Put two lists together.
+  
+      iex> import Elchemy.XList
+      iex> append().([1, 1, 2]).([3, 5, 8])
+      [1, 1, 2, 3, 5, 8]
+
+      iex> import Elchemy.XList
+      iex> append().([?a, ?b]).([?c])
+      [?a, ?b, ?c]
+
+  
+  You can also use [the `(++)` operator](Basics#++) to append lists.
+  
+  
+  """
+  @spec append(list(any), list(any)) :: list(any)
+  curry append/2
+  def append(xs, ys) do
+    case ys do
+      [] ->
+        xs
+      _ ->
+        foldr().((&cons/0).()).(ys).(xs)
+    end
+  end
+
+  @doc """
+  Concatenate a bunch of lists into a single list:
+  
+      iex> import Elchemy.XList
+      iex> concat().([[1, 2], [3], [4, 5]])
+      [1, 2, 3, 4, 5]
+
+  
+  
+  """
+  @spec concat(list(list(any))) :: list(any)
+  curry concat/1
+  def concat(lists) do
+    foldr().(append()).([]).(lists)
+  end
+
+  @doc """
+  Map a given function onto a list and flatten the resulting lists.
+  
+      iex> import Elchemy.XList
+      iex> (concat_map().(range().(2)).([1]) == concat().(map().(range().(2)).([1])))
+      :true
+
+  
+  
+  """
+  @spec concat_map((any -> list(any)), list(any)) :: list(any)
+  curry concat_map/2
+  def concat_map(f, list) do
+    concat().(map().(f).(list))
+  end
+
+  @doc """
+  Get the sum of the list elements.
+  
+      iex> import Elchemy.XList
+      iex> sum().([1, 2, 3, 4])
+      10
+
+  
+  
+  """
+  @spec sum(list(number)) :: number
+  curry sum/1
+  def sum(numbers) do
+    foldl().((&+/0).()).(0).(numbers)
+  end
+
+  @doc """
+  Get the product of the list elements.
+  
+      iex> import Elchemy.XList
+      iex> product().([1, 2, 3, 4])
+      24
+
+  
+  
+  """
+  @spec product(list(number)) :: number
+  curry product/1
+  def product(numbers) do
+    foldl().((&*/0).()).(1).(numbers)
+  end
+
+  @doc """
+  Find the maximum element in a non-empty list.
+  
+      iex> import Elchemy.XList
+      iex> maximum().([1, 4, 2])
+      {4}
+
+      iex> import Elchemy.XList
+      iex> maximum().([])
+      nil
+
+  
+  
+  """
+  @spec maximum(list(any)) :: {any} | nil
+  curry maximum/1
+  def maximum([x | xs]) do
+    {foldl().(max()).(x).(xs)}
+  end
+  def maximum(_) do
+    nil
+  end
+
+  @doc """
+  Find the minimum element in a non-empty list.
+  
+      iex> import Elchemy.XList
+      iex> minimum().([3, 2, 1])
+      {1}
+
+      iex> import Elchemy.XList
+      iex> minimum().([])
+      nil
+
+  
+  
+  """
+  @spec minimum(list(any)) :: {any} | nil
+  curry minimum/1
+  def minimum([x | xs]) do
+    {foldl().(min()).(x).(xs)}
+  end
+  def minimum(_) do
+    nil
+  end
+
+  @doc """
+  Partition a list based on a predicate. The first list contains all values
+  that satisfy the predicate, and the second list contains all the value that do
+  not.
+  
+      iex> import Elchemy.XList
+      iex> partition().(fn(x) -> (x < 3) end).([0, 1, 2, 3, 4, 5])
+      {[0, 1, 2], [3, 4, 5]}
+
+      iex> import Elchemy.XList
+      iex> partition().(fn(a) -> (rem(a, 2) == 0) end).([0, 1, 2, 3, 4, 5])
+      {[0, 2, 4], [1, 3, 5]}
+
+  
+  
+  """
+  @spec partition((any -> boolean), list(any)) :: {list(any), list(any)}
+  curry partition/2
+  def partition(pred, list) do
+    foldr().(partition_step().(pred)).({[], []}).(list)
+  end
+
+  @spec partition_step((any -> boolean), any, {list(any), list(any)}) :: {list(any), list(any)}
+  curryp partition_step/3
+  defp partition_step(pred, x, {trues, falses}) do
+    if pred.(x) do {[x | trues], falses} else {trues, [x | falses]} end
+  end
+
+  @doc """
+  Combine two lists, combining them with the given function.
+  If one list is longer, the extra elements are dropped.
+  
+      iex> import Elchemy.XList
+      iex> map2().((&+/0).()).([1, 2, 3]).([1, 2, 3, 4])
+      [2, 4, 6]
+
+  
+      iex> import Elchemy.XList
+      iex> map2().((&tuple2/0).()).([1, 2, 3]).([?a, ?b])
+      [{1, ?a}, {2, ?b}]
+
+  
+  
+  """
+  @spec map2((any -> (any -> any)), list(any), list(any)) :: list(any)
+  curry map2/3
+  def map2(f, a, b) do
+    zip_().(a).(b)
+    |> (map().(uncurried().(f))).()
+  end
+
+  @spec zip_(list(any), list(any)) :: list({any, any})
+  curryp zip_/2
+  verify as: Enum.zip/2
+  defp zip_(a1, a2), do: Enum.zip(a1, a2)
+  #  map3 : (a -> b -> c -> result) -> List a -> List b -> List c -> List result--   Native.List.map3-- map4 : (a -> b -> c -> d -> result) -> List a -> List b -> List c -> List d -> List result--   Native.List.map4-- map5 : (a -> b -> c -> d -> e -> result) -> List a -> List b -> List c -> List d -> List e -> List result--   Native.List.map5
+  @doc """
+  Decompose a list of tuples into a tuple of lists.
+  
+      iex> import Elchemy.XList
+      iex> unzip().(repeat().(3).({0, :true}))
+      {[0, 0, 0], [:true, :true, :true]}
+
+  
+  
+  """
+  @spec unzip(list({any, any})) :: {list(any), list(any)}
+  curry unzip/1
+  def unzip(pairs) do
+    foldr().(unzip_step()).({[], []}).(pairs)
+  end
+
+  @spec unzip_step({any, any}, {list(any), list(any)}) :: {list(any), list(any)}
+  curryp unzip_step/2
+  defp unzip_step({x, y}, {xs, ys}) do
+    {[x | xs], [y | ys]}
+  end
+
+  @doc """
+  Places the given value between all members of the given list.
+  
+      iex> import Elchemy.XList
+      iex> intersperse().("on").(["turtles", "turtles", "turtles"])
+      ["turtles", "on", "turtles", "on", "turtles"]
+
+  
+  
+  """
+  @spec intersperse(any, list(any)) :: list(any)
+  curry intersperse/2
+  def intersperse(sep, xs) do
+    case xs do
+      [] ->
+        []
+      [hd | tl] ->
+        step = fn(x) -> fn(rest) -> [sep | [x | rest]] end end
+        spersed = foldr().(step).([]).(tl)
+        [hd | spersed]
+    end
+  end
+
+  @doc """
+  Take the first *n* members of a list.
+  
+      iex> import Elchemy.XList
+      iex> take().(2).([1, 2, 3, 4])
+      [1, 2]
+
+  
+  
+  """
+  @spec take(integer, list(any)) :: list(any)
+  curry take/2
+  def take(n, list) do
+    take_fast().(0).(n).(list)
+  end
+
+  @spec take_fast(integer, integer, list(any)) :: list(any)
+  curryp take_fast/3
+  defp take_fast(ctr, n, list) do
+    if (n <= 0) do [] else case {n, list} do
+      {_, []} ->
+        list
+      {1, [x | _]} ->
+        [x]
+      {2, [x | [y | _]]} ->
+        [x, y]
+      {3, [x | [y | [z | _]]]} ->
+        [x, y, z]
+      {_, [x | [y | [z | [w | tl]]]]} ->
+        if (ctr > 1000) do [x | [y | [z | [w | take_tail_rec().((n - 4)).(tl)]]]] else [x | [y | [z | [w | take_fast().((ctr + 1)).((n - 4)).(tl)]]]] end
+      _ ->
+        list
+    end end
+  end
+
+  @spec take_tail_rec(integer, list(any)) :: list(any)
+  curryp take_tail_rec/2
+  defp take_tail_rec(n, list) do
+    reverse().(take_reverse().(n).(list).([]))
+  end
+
+  @spec take_reverse(integer, list(any), list(any)) :: list(any)
+  curryp take_reverse/3
+  defp take_reverse(n, list, taken) do
+    if (n <= 0) do taken else case list do
+      [] ->
+        taken
+      [x | xs] ->
+        take_reverse().((n - 1)).(xs).([x | taken])
+    end end
+  end
+
+  @doc """
+  Drop the first *n* members of a list.
+  
+      iex> import Elchemy.XList
+      iex> drop().(2).([1, 2, 3, 4])
+      [3, 4]
+
+  
+  
+  """
+  @spec drop(integer, list(any)) :: list(any)
+  curry drop/2
+  def drop(n, list) do
+    if (n <= 0) do list else case list do
+      [] ->
+        list
+      [_ | xs] ->
+        drop().((n - 1)).(xs)
+    end end
+  end
+
+  @doc """
+  Create a list with only one element:
+  
+      iex> import Elchemy.XList
+      iex> singleton().(1234)
+      [1234]
+
+      iex> import Elchemy.XList
+      iex> singleton().("hi")
+      ["hi"]
+
+  
+  
+  """
+  @spec singleton(any) :: list(any)
+  curry singleton/1
+  def singleton(value) do
+    [value]
+  end
+
+  @doc """
+  Create a list with *n* copies of a value:
+  
+      iex> import Elchemy.XList
+      iex> repeat().(3).(0)
+      [0, 0, 0]
+
+  
+  
+  """
+  @spec repeat(integer, any) :: list(any)
+  curry repeat/2
+  def repeat(n, value) do
+    repeat_help().([]).(n).(value)
+  end
+
+  @spec repeat_help(list(any), integer, any) :: list(any)
+  curryp repeat_help/3
+  defp repeat_help(result, n, value) do
+    if (n <= 0) do result else repeat_help().([value | result]).((n - 1)).(value) end
+  end
+
+  @doc """
+  Create a list of numbers, every element increasing by one.
+  You give the lowest and highest number that should be in the list.
+  
+      iex> import Elchemy.XList
+      iex> range().(3).(6)
+      [3, 4, 5, 6]
+
+      iex> import Elchemy.XList
+      iex> range().(3).(3)
+      [3]
+
+      iex> import Elchemy.XList
+      iex> range().(6).(3)
+      []
+
+  
+  
+  """
+  @spec range(integer, integer) :: list(integer)
+  curry range/2
+  def range(lo, hi) do
+    range_help().(lo).(hi).([])
+  end
+
+  @spec range_help(integer, integer, list(integer)) :: list(integer)
+  curryp range_help/3
+  defp range_help(lo, hi, list) do
+    if (lo <= hi) do range_help().(lo).((hi - 1)).([hi | list]) else list end
+  end
+
+  @doc """
+  Sort values from lowest to highest
+  
+      iex> import Elchemy.XList
+      iex> sort().([3, 1, 5])
+      [1, 3, 5]
+
+  
+  
+  """
+  @spec sort(list(any)) :: list(any)
+  curry sort/1
+  def sort(xs) do
+    sort_by().(identity()).(xs)
+  end
+
+  @doc """
+  Sort values by a derived property. To be replaced
+  
+      iex> import Elchemy.XList
+      iex> sort_by().(fn({i, _}) -> i end).([{1, "mouse"}, {0, "cat"}])
+      [{0, "cat"}, {1, "mouse"}]
+
+  
+  
+  """
+  @spec sort_by((any -> any), list(any)) :: list(any)
+  curry sort_by/2
+  def sort_by(f, list) do
+    sort_with().(fn(a) -> fn(b) -> compare().(f.(a)).(f.(b)) end end).(list)
+  end
+
+  @doc """
+  Sort values with a custom comparison function.
+  
+      iex> import Elchemy.XList
+      iex> sort_with().(flip().(compare())).([1, 2, 3, 4, 5])
+      [5, 4, 3, 2, 1]
+
+  
+  This is also the most general sort function, allowing you
+  to define any other: `sort == sortWith compare`
+  f
+  
+  
+  """
+  @spec sort_with((any -> (any -> :order)), list(any)) :: list(any)
+  curry sort_with/2
+  def sort_with(f, list) do
+    exf = fn(a) -> fn(b) -> f.(a).(b)
+    |> (fn(a) -> case a do
+      :gt ->
+        :false
+      :eq ->
+        :false
+      :lt ->
+        :true
+    end end).() end end
+    sort_().(list).(exf)
+  end
+
+  @spec sort_(list(any), (any -> (any -> boolean))) :: list(any)
+  curryp sort_/2
+  verify as: Enum.sort/2
+  defp sort_(a1, a2), do: Enum.sort(a1, fn (x1,x2) -> a2.(x1).(x2) end)
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XMaybe.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XMaybe do
+  use Elchemy
+
+  @moduledoc """
+  This library fills a bunch of important niches in Elm. A `Maybe` can help
+  you with optional arguments, error handling, and records with optional fields.
+  
+  
+  # Definition
+  
+  @docs Maybe
+  
+  
+  # Common Helpers
+  
+  @docs withDefault, map, map2, map3, map4, map5
+  
+  
+  # Chaining Maybes
+  
+  @docs andThen
+  
+  
+  """
+  @typedoc """
+  Represent values that may or may not exist. It can be useful if you have a
+  record field that is only filled in sometimes. Or if a function takes a value
+  sometimes, but does not absolutely need it.
+  
+  """
+  @type maybe :: {:just, any} | :nothing
+
+  @doc """
+  Provide a default value, turning an optional value into a normal
+  value. This comes in handy when paired with functions like
+  [`Dict.get`](Dict#get) which gives back a `Maybe`.
+  
+      iex> import Elchemy.XMaybe
+      iex> with_default().(100).({42})
+      42
+
+      iex> import Elchemy.XMaybe
+      iex> with_default().(100).(nil)
+      100
+
+  
+  
+  """
+  @spec with_default(any, {any} | nil) :: any
+  curry with_default/2
+  def with_default(default, maybe) do
+    case maybe do
+      nil ->
+        default
+      {value} ->
+        value
+    end
+  end
+
+  @doc """
+  Transform a `Maybe` value with a given function:
+  
+      iex> import Elchemy.XMaybe
+      iex> map().((&+/0).().(2)).({9})
+      {11}
+
+      iex> import Elchemy.XMaybe
+      iex> map().((&+/0).().(2)).(nil)
+      nil
+
+  
+  
+  """
+  curry map/2
+  def map(f, maybe) do
+    case maybe do
+      nil ->
+        nil
+      {value} ->
+        {f.(value)}
+    end
+  end
+
+  @doc """
+  Apply a function if all the arguments are `Just` a value.
+  
+      iex> import Elchemy.XMaybe
+      iex> map2().((&+/0).()).({3}).({4})
+      {7}
+
+      iex> import Elchemy.XMaybe
+      iex> map2().((&+/0).()).({3}).(nil)
+      nil
+
+      iex> import Elchemy.XMaybe
+      iex> map2().((&+/0).()).(nil).({4})
+      nil
+
+  
+  
+  """
+  curry map2/3
+  def map2(func, ma, mb) do
+    case {ma, mb} do
+      {{a}, {b}} ->
+        {func.(a).(b)}
+      _ ->
+        nil
+    end
+  end
+
+  @doc """
+  
+  """
+  curry map3/4
+  def map3(func, ma, mb, mc) do
+    case {ma, mb, mc} do
+      {{a}, {b}, {c}} ->
+        {func.(a).(b).(c)}
+      _ ->
+        nil
+    end
+  end
+
+  @doc """
+  
+  """
+  curry map4/5
+  def map4(func, ma, mb, mc, md) do
+    case {ma, mb, mc, md} do
+      {{a}, {b}, {c}, {d}} ->
+        {func.(a).(b).(c).(d)}
+      _ ->
+        nil
+    end
+  end
+
+  @doc """
+  
+  """
+  curry map5/6
+  def map5(func, ma, mb, mc, md, me) do
+    case {ma, mb, mc, md, me} do
+      {{a}, {b}, {c}, {d}, {e}} ->
+        {func.(a).(b).(c).(d).(e)}
+      _ ->
+        nil
+    end
+  end
+
+  @doc """
+  Chain together many computations that may fail. It is helpful to see its
+  definition:
+  
+  This means we only continue with the callback if things are going well. For
+  example, say you need to use (`head : List Int -> Maybe Int`) to get the
+  first month from a `List` and then make sure it is between 1 and 12:
+  
+  If `head` fails and results in `Nothing` (because the `List` was `empty`),
+  this entire chain of operations will short-circuit and result in `Nothing`.
+  If `toValidMonth` results in `Nothing`, again the chain of computations
+  will result in `Nothing`.
+  
+  
+  """
+  curry and_then/2
+  def and_then(callback, maybe_value) do
+    case maybe_value do
+      {value} ->
+        callback.(value)
+      nil ->
+        nil
+    end
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XResult.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XResult do
+  use Elchemy
+
+  @moduledoc """
+  A `Result` is the result of a computation that may fail. This is a great
+  way to manage errors in Elm.
+  
+  
+  # Type and Constructors
+  
+  @docs Result
+  
+  
+  # Mapping
+  
+  @docs map, map2, map3, map4, map5
+  
+  
+  # Chaining
+  
+  @docs andThen
+  
+  
+  # Handling Errors
+  
+  @docs withDefault, toMaybe, fromMaybe, mapError
+  
+  
+  """
+  @typedoc """
+  A `Result` is either `Ok` meaning the computation succeeded, or it is an
+  `Err` meaning that there was some failure.
+  
+  """
+  @type result :: {:ok, any} | {:err, any}
+
+  @doc """
+  If the result is `Ok` return the value, but if the result is an `Err` then
+  return a given default value. The following examples try to parse integers.
+  
+      iex> import Elchemy.XResult
+      iex> with_default().(0).(XString.to_int.("123"))
+      123
+
+      iex> import Elchemy.XResult
+      iex> with_default().(0).(XString.to_int.("abc"))
+      0
+
+  
+  
+  """
+  @spec with_default(any, result) :: any
+  curry with_default/2
+  def with_default(def, result) do
+    case result do
+      {:ok, a} ->
+        a
+      {:error, _} ->
+        def
+    end
+  end
+
+  @doc """
+  Apply a function to a result. If the result is `Ok`, it will be converted.
+  If the result is an `Err`, the same error value will propagate through.
+  
+      iex> import Elchemy.XResult
+      iex> map().(sqrt()).({:ok, 4.0})
+      {:ok, 2.0}
+
+      iex> import Elchemy.XResult
+      iex> map().(sqrt()).({:error, "bad input"})
+      {:error, "bad input"}
+
+  
+  
+  """
+  @spec map((any -> any), result) :: result
+  curry map/2
+  def map(func, ra) do
+    case ra do
+      {:ok, a} ->
+        {:ok, func.(a)}
+      {:error, e} ->
+        {:error, e}
+    end
+  end
+
+  @doc """
+  Apply a function to two results, if both results are `Ok`. If not,
+  the first argument which is an `Err` will propagate through.
+  
+      iex> import Elchemy.XResult
+      iex> map2().((&+/0).()).(XString.to_int.("1")).(XString.to_int.("2"))
+      {:ok, 3}
+
+      iex> import Elchemy.XResult
+      iex> map2().((&+/0).()).(XString.to_int.("1")).(XString.to_int.("y"))
+      {:error, "could not convert string 'y' to an Int"}
+
+      iex> import Elchemy.XResult
+      iex> map2().((&+/0).()).(XString.to_int.("x")).(XString.to_int.("y"))
+      {:error, "could not convert string 'x' to an Int"}
+
+  
+  
+  """
+  @spec map2((any -> (any -> any)), result, result) :: result
+  curry map2/3
+  def map2(func, ra, rb) do
+    case {ra, rb} do
+      {{:ok, a}, {:ok, b}} ->
+        {:ok, func.(a).(b)}
+      {{:error, x}, _} ->
+        {:error, x}
+      {_, {:error, x}} ->
+        {:error, x}
+    end
+  end
+
+  @doc """
+  
+  """
+  @spec map3((any -> (any -> (any -> any))), result, result, result) :: result
+  curry map3/4
+  def map3(func, ra, rb, rc) do
+    case {ra, rb, rc} do
+      {{:ok, a}, {:ok, b}, {:ok, c}} ->
+        {:ok, func.(a).(b).(c)}
+      {{:error, x}, _, _} ->
+        {:error, x}
+      {_, {:error, x}, _} ->
+        {:error, x}
+      {_, _, {:error, x}} ->
+        {:error, x}
+    end
+  end
+
+  @doc """
+  
+  """
+  @spec map4((any -> (any -> (any -> (any -> any)))), result, result, result, result) :: result
+  curry map4/5
+  def map4(func, ra, rb, rc, rd) do
+    case {ra, rb, rc, rd} do
+      {{:ok, a}, {:ok, b}, {:ok, c}, {:ok, d}} ->
+        {:ok, func.(a).(b).(c).(d)}
+      {{:error, x}, _, _, _} ->
+        {:error, x}
+      {_, {:error, x}, _, _} ->
+        {:error, x}
+      {_, _, {:error, x}, _} ->
+        {:error, x}
+      {_, _, _, {:error, x}} ->
+        {:error, x}
+    end
+  end
+
+  @doc """
+  
+  """
+  @spec map5((any -> (any -> (any -> (any -> (any -> any))))), result, result, result, result, result) :: result
+  curry map5/6
+  def map5(func, ra, rb, rc, rd, re) do
+    case {ra, rb, rc, rd, re} do
+      {{:ok, a}, {:ok, b}, {:ok, c}, {:ok, d}, {:ok, e}} ->
+        {:ok, func.(a).(b).(c).(d).(e)}
+      {{:error, x}, _, _, _, _} ->
+        {:error, x}
+      {_, {:error, x}, _, _, _} ->
+        {:error, x}
+      {_, _, {:error, x}, _, _} ->
+        {:error, x}
+      {_, _, _, {:error, x}, _} ->
+        {:error, x}
+      {_, _, _, _, {:error, x}} ->
+        {:error, x}
+    end
+  end
+
+  @doc """
+  Chain together a sequence of computations that may fail. It is helpful
+  to see its definition:
+  
+  This means we only continue with the callback if things are going well. For
+  example, say you need to use (`toInt : String -> Result String Int`) to parse
+  a month and make sure it is between 1 and 12:
+  
+  This allows us to come out of a chain of operations with quite a specific error
+  message. It is often best to create a custom type that explicitly represents
+  the exact ways your computation may fail. This way it is easy to handle in your
+  code.
+  
+  
+  """
+  @spec and_then((any -> result), result) :: result
+  curry and_then/2
+  def and_then(callback, result) do
+    case result do
+      {:ok, value} ->
+        callback.(value)
+      {:error, msg} ->
+        {:error, msg}
+    end
+  end
+
+  @doc """
+  Transform an `Err` value. For example, say the errors we get have too much
+  information:
+  
+      iex> import Elchemy.XResult
+      iex> map_error().(XTuple.first).({:ok, {123, 1}})
+      {:ok, {123, 1}}
+
+      iex> import Elchemy.XResult
+      iex> map_error().(XTuple.second).({:error, {"nothing", "important"}})
+      {:error, "important"}
+
+  
+  
+  """
+  @spec map_error((any -> any), result) :: result
+  curry map_error/2
+  def map_error(f, result) do
+    case result do
+      {:ok, v} ->
+        {:ok, v}
+      {:error, e} ->
+        {:error, f.(e)}
+    end
+  end
+
+  @doc """
+  Convert to a simpler `Maybe` if the actual error message is not needed or
+  you need to interact with some code that primarily uses maybes.
+  
+  """
+  @spec to_maybe(result) :: {any} | nil
+  curry to_maybe/1
+  def to_maybe({:ok, v}) do
+    {v}
+  end
+  def to_maybe({:error, _}) do
+    nil
+  end
+
+  @doc """
+  Convert from a simple `Maybe` to interact with some code that primarily
+  uses `Results`.
+  
+  """
+  @spec from_maybe(any, {any} | nil) :: result
+  curry from_maybe/2
+  def from_maybe(err, maybe) do
+    case maybe do
+      {v} ->
+        {:ok, v}
+      nil ->
+        {:error, err}
+    end
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XSet.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XSet do
+  use Elchemy
+
+  @moduledoc """
+  A set of unique values. The values can be any comparable type. This
+  includes `Int`, `Float`, `Time`, `Char`, `String`, and tuples or lists
+  of comparable types.
+  
+  Insert, remove, and query operations all take *O(log n)* time.
+  
+  
+  # Sets
+  
+  @docs Set
+  
+  
+  # Build
+  
+  @docs empty, singleton, insert, remove
+  
+  
+  # Query
+  
+  @docs isEmpty, member, size
+  
+  
+  # Combine
+  
+  @docs union, intersect, diff
+  
+  
+  # Lists
+  
+  @docs toList, fromList
+  
+  
+  # Transform
+  
+  @docs map, foldl, foldr, filter, partition
+  
+  
+  """
+  alias XDict, as: Dict
+  @typedoc """
+  Represents a set of unique values. So `(Set Int)` is a set of integers and
+  `(Set String)` is a set of strings.
+  
+  """
+  @type set :: {:set_elm_builtin, Dict.dict}
+
+  @doc """
+  Create an empty set.
+  
+      iex> import Elchemy.XSet
+      iex> to_list().(empty())
+      []
+
+  
+  
+  """
+  @spec empty() :: set
+  def empty() do
+     {:set_elm_builtin, XDict.empty}
+  end
+
+  @doc """
+  Create a set with one value.
+  
+      iex> import Elchemy.XSet
+      iex> to_list().(singleton().(1))
+      [1]
+
+  
+  
+  """
+  @spec singleton(any) :: set
+  curry singleton/1
+  def singleton(k) do
+    XDict.singleton.(k).({})
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Insert a value into a set.
+  
+      iex> import Elchemy.XSet
+      iex> to_list().(insert().(1).(empty()))
+      [1]
+
+  
+  
+  """
+  @spec insert(any, set) :: set
+  curry insert/2
+  def insert(k,  {:set_elm_builtin, d}) do
+    XDict.insert.(k).({}).(d)
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Remove a value from a set. If the value is not found, no changes are made.
+  
+      iex> import Elchemy.XSet
+      iex> (remove().(1).(from_list().([1])) == empty())
+      :true
+
+  
+  
+  """
+  @spec remove(any, set) :: set
+  curry remove/2
+  def remove(k,  {:set_elm_builtin, d}) do
+    XDict.remove.(k).(d)
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Determine if a set is empty.
+  
+      iex> import Elchemy.XSet
+      iex> is_empty().(empty())
+      :true
+
+  
+  
+  """
+  @spec is_empty(set) :: boolean
+  curry is_empty/1
+  def is_empty( {:set_elm_builtin, d}) do
+    XDict.is_empty.(d)
+  end
+
+  @doc """
+  Determine if a value is in a set.
+  
+      iex> import Elchemy.XSet
+      iex> member().(1).(from_list().([1]))
+      :true
+
+      iex> import Elchemy.XSet
+      iex> member().(0).(from_list().([1]))
+      :false
+
+  
+  
+  """
+  @spec member(any, set) :: boolean
+  curry member/2
+  def member(k,  {:set_elm_builtin, d}) do
+    XDict.member.(k).(d)
+  end
+
+  @doc """
+  Determine the number of elements in a set.
+  
+      iex> import Elchemy.XSet
+      iex> size().(from_list().([1, 2, 3]))
+      3
+
+  
+  
+  """
+  @spec size(set) :: integer
+  curry size/1
+  def size( {:set_elm_builtin, d}) do
+    XDict.size.(d)
+  end
+
+  @doc """
+  Get the union of two sets. Keep all values.
+  
+      iex> import Elchemy.XSet
+      iex> (union().(from_list().([1, 2, 3])).(from_list().([2, 3, 4])) == from_list().([1, 2, 3, 4]))
+      :true
+
+  
+  
+  """
+  @spec union(set, set) :: set
+  curry union/2
+  def union( {:set_elm_builtin, d1},  {:set_elm_builtin, d2}) do
+    XDict.union.(d1).(d2)
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Get the intersection of two sets. Keeps values that appear in both sets.
+  
+  """
+  @spec intersect(set, set) :: set
+  curry intersect/2
+  def intersect( {:set_elm_builtin, d1},  {:set_elm_builtin, d2}) do
+    XDict.intersect.(d1).(d2)
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Get the difference between the first set and the second. Keeps values
+  that do not appear in the second set.
+  
+  """
+  @spec diff(set, set) :: set
+  curry diff/2
+  def diff( {:set_elm_builtin, d1},  {:set_elm_builtin, d2}) do
+    XDict.diff.(d1).(d2)
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Convert a set into a list, sorted from lowest to highest.
+  
+  """
+  @spec to_list(set) :: list(any)
+  curry to_list/1
+  def to_list( {:set_elm_builtin, d}) do
+    XDict.keys.(d)
+  end
+
+  @doc """
+  Convert a list into a set, removing any duplicates.
+  
+  """
+  @spec from_list(list(any)) :: set
+  curry from_list/1
+  def from_list(xs) do
+    XList.foldl.(insert()).(empty()).(xs)
+  end
+
+  @doc """
+  Fold over the values in a set, in order from lowest to highest.
+  
+  """
+  @spec foldl((any -> (any -> any)), any, set) :: any
+  curry foldl/3
+  def foldl(f, b,  {:set_elm_builtin, d}) do
+    XDict.foldl.(fn(k) -> fn(_) -> fn(b) -> f.(k).(b) end end end).(b).(d)
+  end
+
+  @doc """
+  Fold over the values in a set, in order from highest to lowest.
+  
+  """
+  @spec foldr((any -> (any -> any)), any, set) :: any
+  curry foldr/3
+  def foldr(f, b,  {:set_elm_builtin, d}) do
+    XDict.foldr.(fn(k) -> fn(_) -> fn(b) -> f.(k).(b) end end end).(b).(d)
+  end
+
+  @doc """
+  Map a function onto a set, creating a new set with no duplicates.
+  
+  """
+  @spec map((any -> any), set) :: set
+  curry map/2
+  def map(f, s) do
+    from_list().(XList.map.(f).(to_list().(s)))
+  end
+
+  @doc """
+  Create a new set consisting only of elements which satisfy a predicate.
+  
+  """
+  @spec filter((any -> boolean), set) :: set
+  curry filter/2
+  def filter(p,  {:set_elm_builtin, d}) do
+    XDict.filter.(fn(k) -> fn(_) -> p.(k) end end).(d)
+    |> ( fn x1 -> {:set_elm_builtin, x1} end ).()
+  end
+
+  @doc """
+  Create two new sets; the first consisting of elements which satisfy a
+  predicate, the second consisting of elements which do not.
+  
+  """
+  @spec partition((any -> boolean), set) :: {set, set}
+  curry partition/2
+  def partition(p,  {:set_elm_builtin, d}) do
+    {p1, p2} = XDict.partition.(fn(k) -> fn(_) -> p.(k) end end).(d)
+    { {:set_elm_builtin, p1},  {:set_elm_builtin, p2}}
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XString.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XString do
+  use Elchemy
+
+  @moduledoc """
+  A built-in representation for efficient string manipulation. String literals
+  are enclosed in `"double quotes"`. Strings are *not* lists of characters.
+  
+  
+  # Basics
+  
+  @docs isEmpty, length, reverse, repeat
+  
+  
+  # Building and Splitting
+  
+  @docs cons, uncons, fromChar, append, concat, split, join, words, lines
+  
+  
+  # Get Substrings
+  
+  @docs slice, left, right, dropLeft, dropRight
+  
+  
+  # Check for Substrings
+  
+  @docs contains, startsWith, endsWith, indexes, indices
+  
+  
+  # Conversions
+  
+  @docs toInt, toFloat, toList, fromList
+  
+  
+  # Formatting
+  
+  Cosmetic operations such as padding with extra characters or trimming whitespace.
+  
+  @docs toUpper, toLower, pad, padLeft, padRight, trim, trimLeft, trimRight
+  
+  
+  # Higher-Order Functions
+  
+  @docs map, filter, foldl, foldr, any, all
+  
+  
+  """
+  alias Elchemy.XList, as: XList
+  alias Elchemy.XTuple, as: XTuple
+
+  import Kernel, except: [
+  {:length, 1},
+  {:'++', 2},
+  {:to_charlist, 1}
+
+  ]
+  import Elchemy.XBasics, except: [
+  {:to_float, 1},
+  ]
+
+  @doc """
+  Determine if a string is empty.
+  
+      iex> import Elchemy.XString
+      iex> is_empty().("")
+      :true
+
+      iex> import Elchemy.XString
+      iex> is_empty().("the world")
+      :false
+
+  
+  
+  """
+  @spec is_empty(String.t) :: boolean
+  curry is_empty/1
+  def is_empty(str) do
+    (length().(str) == 0)
+  end
+
+  @doc """
+  Add a character to the beginning of a string.
+  
+      iex> import Elchemy.XString
+      iex> XString.cons.(?T).("he truth is out there")
+      "The truth is out there"
+
+  
+  
+  """
+  @spec cons(integer, String.t) :: String.t
+  curry cons/2
+  def cons(c, str) do
+    (from_char().(c) ++ str)
+  end
+
+  @doc """
+  Create a string from a given character.
+  
+      iex> import Elchemy.XString
+      iex> from_char().(?a)
+      "a"
+
+  
+  
+  """
+  @spec from_char(integer) :: String.t
+  curry from_char/1
+  def from_char(char) do
+    XList.singleton.(char)
+    |> (from_charlist()).()
+  end
+
+  @spec from_charlist(list(integer)) :: String.t
+  curryp from_charlist/1
+  verify as: :binary.list_to_bin/1
+  defp from_charlist(a1), do: :binary.list_to_bin(a1)
+  @doc """
+  Split a non-empty string into its head and tail. This lets you
+  pattern match on strings exactly as you would with lists.
+  
+      iex> import Elchemy.XString
+      iex> uncons().("abc")
+      {{?a, "bc"}}
+
+      iex> import Elchemy.XString
+      iex> uncons().("")
+      nil
+
+  
+  
+  """
+  @spec uncons(String.t) :: {{integer, String.t}} | nil
+  curry uncons/1
+  def uncons(str) do
+    {first, rest} = split_at_().(str).(1)
+    real_first = first
+    |> (to_list()).()
+    case real_first do
+      [] ->
+        nil
+      [r] ->
+        {{r, rest}}
+      _ ->
+        nil
+    end
+  end
+
+  @spec split_at_(String.t, integer) :: {String.t, String.t}
+  curryp split_at_/2
+  verify as: String.split_at/2
+  defp split_at_(a1, a2), do: String.split_at(a1, a2)
+  @doc """
+  Append two strings. You can also use [the `(++)` operator](Basics#++)
+  to do this.
+  
+      iex> import Elchemy.XString
+      iex> append().("butter").("fly")
+      "butterfly"
+
+  
+  
+  """
+  @spec append(String.t, String.t) :: String.t
+  curry append/2
+  def append(a, b) do
+    (a ++ b)
+  end
+
+  @doc """
+  Concatenate many strings into one.
+  
+      iex> import Elchemy.XString
+      iex> concat().(["never", "the", "less"])
+      "nevertheless"
+
+  
+  
+  """
+  @spec concat(list(String.t)) :: String.t
+  curry concat/1
+  def concat(list) do
+    XList.foldr.((&++/0).()).("").(list)
+  end
+
+  @doc """
+  Get the length of a string.
+  
+      iex> import Elchemy.XString
+      iex> length().("innumerable")
+      11
+
+      iex> import Elchemy.XString
+      iex> length().("")
+      0
+
+  
+  
+  """
+  @spec length(String.t) :: integer
+  curry length/1
+  verify as: String.length/1
+  def length(a1), do: String.length(a1)
+  @doc """
+  Transform every character in a string
+  
+      iex> import Elchemy.XString
+      iex> map().(fn(c) -> if (c == ?/) do ?. else c end end).("a/b/c")
+      "a.b.c"
+
+  
+  
+  """
+  curry map/2
+  def map(f, str) do
+    str
+    |> (to_list()).()
+    |> (XList.map.((f >>> from_char()))).()
+    |> (join().("")).()
+  end
+
+  @doc """
+  Keep only the characters that satisfy the predicate.
+  
+      iex> import Elchemy.XString
+      iex> filter().((&==/0).().(?2)).("R2-D2")
+      "22"
+
+  
+  
+  """
+  curry filter/2
+  def filter(f, str) do
+    str
+    |> (to_list()).()
+    |> (XList.filter.(f)).()
+    |> (XList.map.(from_char())).()
+    |> (join().("")).()
+  end
+
+  @doc """
+  Reverse a string.
+  
+      iex> import Elchemy.XString
+      iex> reverse().("stressed")
+      "desserts"
+
+  
+  
+  """
+  @spec reverse(String.t) :: String.t
+  curry reverse/1
+  verify as: String.reverse/1
+  def reverse(a1), do: String.reverse(a1)
+  @doc """
+  Reduce a string from the left.
+  
+      iex> import Elchemy.XString
+      iex> foldl().(XString.cons).("").("time")
+      "emit"
+
+  
+  
+  """
+  curry foldl/3
+  def foldl(f, acc, str) do
+    str
+    |> (to_list()).()
+    |> (XList.foldl.(f).(acc)).()
+  end
+
+  @doc """
+  Reduce a string from the right.
+  
+      iex> import Elchemy.XString
+      iex> foldr().(XString.cons).("").("time")
+      "time"
+
+  
+  
+  """
+  curry foldr/3
+  def foldr(f, acc, str) do
+    str
+    |> (to_list()).()
+    |> (XList.foldr.(f).(acc)).()
+  end
+
+  @doc """
+  Split a string using a given separator.
+  
+      iex> import Elchemy.XString
+      iex> split().(",").("cat,dog,cow")
+      ["cat", "dog", "cow"]
+
+      iex> import Elchemy.XString
+      iex> split().("/").("home/evan/Desktop/")
+      ["home", "evan", "Desktop", ""]
+
+  
+  Use [`Regex.split`](Regex#split) if you need something more flexible.
+  
+  
+  """
+  @spec split(String.t, String.t) :: list(String.t)
+  curry split/2
+  def split(pattern, str) do
+    split_().(str).([pattern]).([])
+  end
+
+  @type split_option :: {:trim, boolean}
+
+  @spec split_(String.t, list(String.t), list(split_option)) :: list(String.t)
+  curryp split_/3
+  verify as: String.split/3
+  defp split_(a1, a2, a3), do: String.split(a1, a2, a3)
+  @doc """
+  Put many strings together with a given separator.
+  
+      iex> import Elchemy.XString
+      iex> join().("a").(["H", "w", "ii", "n"])
+      "Hawaiian"
+
+      iex> import Elchemy.XString
+      iex> join().(" ").(["cat", "dog", "cow"])
+      "cat dog cow"
+
+      iex> import Elchemy.XString
+      iex> join().("/").(["home", "evan", "Desktop"])
+      "home/evan/Desktop"
+
+  
+  
+  """
+  @spec join(String.t, list(String.t)) :: String.t
+  curry join/2
+  def join(str, list) do
+    join_().(list).(str)
+  end
+
+  @spec join_(list(String.t), String.t) :: String.t
+  curryp join_/2
+  verify as: Enum.join/2
+  defp join_(a1, a2), do: Enum.join(a1, a2)
+  @doc """
+  Repeat a string *n* times.
+  
+      iex> import Elchemy.XString
+      iex> repeat().(3).("ha")
+      "hahaha"
+
+  
+  
+  """
+  @spec repeat(integer, String.t) :: String.t
+  curry repeat/2
+  def repeat(n, str) do
+    repeat_().(str).(n)
+  end
+
+  @spec repeat_(String.t, integer) :: String.t
+  curryp repeat_/2
+  verify as: String.duplicate/2
+  defp repeat_(a1, a2), do: String.duplicate(a1, a2)
+  #                      7  2--                     0 6--                      0  11--                          12       5
+  @doc """
+  Take a substring given a start and end index. Negative indexes
+  are taken starting from the *end* of the list.
+  
+      iex> import Elchemy.XString
+      iex> slice().(7).(9).("snakes on a plane!")
+      "on"
+
+      iex> import Elchemy.XString
+      iex> slice().(0).(6).("snakes on a plane!")
+      "snakes"
+
+      iex> import Elchemy.XString
+      iex> slice().(0).(-7).("snakes on a plane!")
+      "snakes on a"
+
+      iex> import Elchemy.XString
+      iex> slice().(-6).(-1).("snakes on a plane!")
+      "plane"
+
+  
+  
+  """
+  @spec slice(integer, integer, String.t) :: String.t
+  curry slice/3
+  def slice(from, to, str) do
+    l = length().(str)
+    mirror = fn(a) -> if (a < 0) do (l + a) else a end end
+    start = mirror.(from)
+    len = (mirror.(to) - start)
+    slice_().(str).(start).(len)
+  end
+
+  @spec slice_(String.t, integer, integer) :: String.t
+  curryp slice_/3
+  verify as: String.slice/3
+  defp slice_(a1, a2, a3), do: String.slice(a1, a2, a3)
+  @doc """
+  Take *n* characters from the left side of a string.
+  
+      iex> import Elchemy.XString
+      iex> left().(2).("Mulder")
+      "Mu"
+
+  
+  
+  """
+  @spec left(integer, String.t) :: String.t
+  curry left/2
+  def left(n, str) do
+    slice().(0).(n).(str)
+  end
+
+  @doc """
+  Take *n* characters from the right side of a string.
+  
+      iex> import Elchemy.XString
+      iex> right().(2).("Scully")
+      "ly"
+
+  
+  
+  """
+  @spec right(integer, String.t) :: String.t
+  curry right/2
+  def right(n, str) do
+    slice().(negate().(n)).(length().(str)).(str)
+  end
+
+  @doc """
+  Drop *n* characters from the left side of a string.
+  
+      iex> import Elchemy.XString
+      iex> drop_left().(2).("The Lone Gunmen")
+      "e Lone Gunmen"
+
+  
+  
+  """
+  @spec drop_left(integer, String.t) :: String.t
+  curry drop_left/2
+  def drop_left(n, str) do
+    slice().(n).(length().(str)).(str)
+  end
+
+  @doc """
+  Drop *n* characters from the right side of a string.
+  
+      iex> import Elchemy.XString
+      iex> drop_right().(2).("Cigarette Smoking Man")
+      "Cigarette Smoking M"
+
+  
+  
+  """
+  @spec drop_right(integer, String.t) :: String.t
+  curry drop_right/2
+  def drop_right(n, str) do
+    slice().(0).(negate().(n)).(str)
+  end
+
+  @doc """
+  Pad a string on both sides until it has a given length.
+  
+      iex> import Elchemy.XString
+      iex> pad().(5).(?\\s).("1")
+      "  1  "
+
+      iex> import Elchemy.XString
+      iex> pad().(5).(?\\s).("11")
+      "  11 "
+
+      iex> import Elchemy.XString
+      iex> pad().(5).(?\\s).("121")
+      " 121 "
+
+  
+  
+  """
+  @spec pad(integer, integer, String.t) :: String.t
+  curry pad/3
+  def pad(n, c, str) do
+    right = div((length().(str) + n), 2)
+    left = n
+    str
+    |> (pad_right().(right).(c)).()
+    |> (pad_left().(left).(c)).()
+  end
+
+  @doc """
+  Pad a string on the left until it has a given length.
+  
+      iex> import Elchemy.XString
+      iex> pad_left().(5).(?.).("1")
+      "....1"
+
+      iex> import Elchemy.XString
+      iex> pad_left().(5).(?.).("11")
+      "...11"
+
+      iex> import Elchemy.XString
+      iex> pad_left().(5).(?.).("121")
+      "..121"
+
+  
+  
+  """
+  @spec pad_left(integer, integer, String.t) :: String.t
+  curry pad_left/3
+  def pad_left(n, c, str) do
+    pad_leading().(str).(n).(from_char().(c))
+  end
+
+  @spec pad_leading(String.t, integer, String.t) :: String.t
+  curryp pad_leading/3
+  verify as: String.pad_leading/3
+  defp pad_leading(a1, a2, a3), do: String.pad_leading(a1, a2, a3)
+  @doc """
+  Pad a string on the right until it has a given length.
+  
+      iex> import Elchemy.XString
+      iex> pad_right().(5).(?.).("1")
+      "1...."
+
+      iex> import Elchemy.XString
+      iex> pad_right().(5).(?.).("11")
+      "11..."
+
+      iex> import Elchemy.XString
+      iex> pad_right().(5).(?.).("121")
+      "121.."
+
+  
+  
+  """
+  @spec pad_right(integer, integer, String.t) :: String.t
+  curry pad_right/3
+  def pad_right(n, c, str) do
+    pad_trailing().(str).(n).(from_char().(c))
+  end
+
+  @spec pad_trailing(String.t, integer, String.t) :: String.t
+  curryp pad_trailing/3
+  verify as: String.pad_trailing/3
+  defp pad_trailing(a1, a2, a3), do: String.pad_trailing(a1, a2, a3)
+  @doc """
+  Get rid of whitespace on both sides of a string.
+  
+      iex> import Elchemy.XString
+      iex> trim().("  hats  \\n")
+      "hats"
+
+  
+  
+  """
+  @spec trim(String.t) :: String.t
+  curry trim/1
+  verify as: String.trim/1
+  def trim(a1), do: String.trim(a1)
+  @doc """
+  Get rid of whitespace on the left of a string.
+  
+      iex> import Elchemy.XString
+      iex> trim_left().("  hats  \\n")
+      "hats  \\n"
+
+  
+  
+  """
+  @spec trim_left(String.t) :: String.t
+  curry trim_left/1
+  verify as: String.trim_leading/1
+  def trim_left(a1), do: String.trim_leading(a1)
+  @doc """
+  Get rid of whitespace on the right of a string.
+  
+      iex> import Elchemy.XString
+      iex> trim_right().("  hats  \\n")
+      "  hats"
+
+  
+  
+  """
+  @spec trim_right(String.t) :: String.t
+  curry trim_right/1
+  verify as: String.trim_trailing/1
+  def trim_right(a1), do: String.trim_trailing(a1)
+  @doc """
+  Break a string into words, splitting on chunks of whitespace.
+  
+      iex> import Elchemy.XString
+      iex> words().("How are \\t you? \\n Good?")
+      ["How", "are", "you?", "Good?"]
+
+  
+  
+  """
+  @spec words(String.t) :: list(String.t)
+  curry words/1
+  verify as: String.split/1
+  def words(a1), do: String.split(a1)
+  @doc """
+  Break a string into lines, splitting on newlines.
+  
+      iex> import Elchemy.XString
+      iex> lines().("How are you?\\nGood?")
+      ["How are you?", "Good?"]
+
+  
+  
+  """
+  @spec lines(String.t) :: list(String.t)
+  curry lines/1
+  def lines(str) do
+    split().("\n").(str)
+  end
+
+  @doc """
+  Convert a string to all upper case. Useful for case-insensitive comparisons
+  and VIRTUAL YELLING.
+  
+      iex> import Elchemy.XString
+      iex> to_upper().("skinner")
+      "SKINNER"
+
+  
+  
+  """
+  @spec to_upper(String.t) :: String.t
+  curry to_upper/1
+  verify as: String.upcase/1
+  def to_upper(a1), do: String.upcase(a1)
+  @doc """
+  Convert a string to all lower case. Useful for case-insensitive comparisons.
+  
+      iex> import Elchemy.XString
+      iex> to_lower().("X-FILES")
+      "x-files"
+
+  
+  
+  """
+  @spec to_lower(String.t) :: String.t
+  curry to_lower/1
+  verify as: String.downcase/1
+  def to_lower(a1), do: String.downcase(a1)
+  @doc """
+  Determine whether *any* characters satisfy a predicate.
+  
+      iex> import Elchemy.XString
+      iex> any().(XChar.is_digit).("90210")
+      :true
+
+      iex> import Elchemy.XString
+      iex> any().(XChar.is_digit).("R2-D2")
+      :true
+
+      iex> import Elchemy.XString
+      iex> any().(XChar.is_digit).("heart")
+      :false
+
+  
+  
+  """
+  curry any/2
+  def any(f, str) do
+    XList.any.(f).(to_list().(str))
+  end
+
+  @doc """
+  Determine whether *all* characters satisfy a predicate.
+  
+      iex> import Elchemy.XString
+      iex> all().(XChar.is_digit).("90210")
+      :true
+
+      iex> import Elchemy.XString
+      iex> all().(XChar.is_digit).("R2-D2")
+      :false
+
+      iex> import Elchemy.XString
+      iex> all().(XChar.is_digit).("heart")
+      :false
+
+  
+  
+  """
+  curry all/2
+  def all(f, str) do
+    XList.all.(f).(to_list().(str))
+  end
+
+  @doc """
+  See if the second string contains the first one.
+  
+      iex> import Elchemy.XString
+      iex> contains().("the").("theory")
+      :true
+
+      iex> import Elchemy.XString
+      iex> contains().("hat").("theory")
+      :false
+
+      iex> import Elchemy.XString
+      iex> contains().("THE").("theory")
+      :false
+
+  
+  Use [`Regex.contains`](Regex#contains) if you need something more flexible.
+  
+  
+  """
+  @spec contains(String.t, String.t) :: boolean
+  curry contains/2
+  def contains(pattern, str) do
+    contains_().(str).(pattern)
+  end
+
+  @spec contains_(String.t, String.t) :: boolean
+  curryp contains_/2
+  verify as: String. contains?/2
+  defp contains_(a1, a2), do: String. contains?(a1, a2)
+  @doc """
+  See if the second string starts with the first one.
+  
+      iex> import Elchemy.XString
+      iex> starts_with().("the").("theory")
+      :true
+
+      iex> import Elchemy.XString
+      iex> starts_with().("ory").("theory")
+      :false
+
+  
+  
+  """
+  @spec starts_with(String.t, String.t) :: boolean
+  curry starts_with/2
+  def starts_with(prefix, str) do
+    starts_with_().(str).(prefix)
+  end
+
+  @spec starts_with_(String.t, String.t) :: boolean
+  curryp starts_with_/2
+  verify as: String.starts_with?/2
+  defp starts_with_(a1, a2), do: String.starts_with?(a1, a2)
+  @doc """
+  See if the second string ends with the first one.
+  
+      iex> import Elchemy.XString
+      iex> ends_with().("the").("theory")
+      :false
+
+      iex> import Elchemy.XString
+      iex> ends_with().("ory").("theory")
+      :true
+
+  
+  
+  """
+  @spec ends_with(String.t, String.t) :: boolean
+  curry ends_with/2
+  def ends_with(suffix, str) do
+    ends_with_().(str).(suffix)
+  end
+
+  @spec ends_with_(String.t, String.t) :: boolean
+  curryp ends_with_/2
+  verify as: String.ends_with?/2
+  defp ends_with_(a1, a2), do: String.ends_with?(a1, a2)
+  @doc """
+  Get all of the indexes for a substring in another string.
+  
+      iex> import Elchemy.XString
+      iex> indexes().("i").("Mississippi")
+      [1, 4, 7, 10]
+
+      iex> import Elchemy.XString
+      iex> indexes().("ss").("Mississippi")
+      [2, 5]
+
+      iex> import Elchemy.XString
+      iex> indexes().("needle").("haystack")
+      []
+
+  
+  
+  """
+  @spec indexes(String.t, String.t) :: list(integer)
+  curry indexes/2
+  def indexes(pattern, str) do
+    matches_().(str).(pattern)
+    |> (XList.map.(XTuple.first)).()
+  end
+
+  @spec matches_(String.t, any) :: list({integer, String.t})
+  curryp matches_/2
+  verify as: :binary.matches/2
+  defp matches_(a1, a2), do: :binary.matches(a1, a2)
+  @doc """
+  Alias for `indexes`.
+  
+  """
+  @spec indices(String.t, String.t) :: list(integer)
+  curry indices/2
+  def indices(pattern, str) do
+    indexes().(pattern).(str)
+  end
+
+  @doc """
+  Try to convert a string into an int, failing on improperly formatted strings.
+  
+      iex> import Elchemy.XString
+      iex> XString.to_int.("123")
+      {:ok, 123}
+
+      iex> import Elchemy.XString
+      iex> XString.to_int.("-42")
+      {:ok, -42}
+
+      iex> import Elchemy.XString
+      iex> XString.to_int.("3.1")
+      {:error, "could not convert string '3.1' to an Int"}
+
+      iex> import Elchemy.XString
+      iex> XString.to_int.("31a")
+      {:error, "could not convert string '31a' to an Int"}
+
+  
+  If you are extracting a number from some raw user input, you will typically
+  want to use [`Result.withDefault`](Result#withDefault) to handle bad data:
+  
+      iex> import Elchemy.XString
+      iex> XResult.with_default.(0).(XString.to_int.("42"))
+      42
+
+      iex> import Elchemy.XString
+      iex> XResult.with_default.(0).(XString.to_int.("ab"))
+      0
+
+  
+  
+  """
+  @spec to_int(String.t) :: {:result, String.t, integer}
+  curry to_int/1
+  def to_int(str) do
+    case to_int_().(str) do
+      {:error, "argument error"} ->
+        {:error, ("could not convert string '" ++ (str ++ "' to an Int"))}
+      e ->
+        e
+    end
+  end
+
+  @spec to_int_(String.t) :: {:result, String.t, integer}
+  curryp to_int_/1
+  defp to_int_(a1) do 
+    try_catch fn -> 
+      String.to_integer(a1)
+    end
+  end
+  @doc """
+  Try to convert a string into a float, failing on improperly formatted strings.
+  
+      iex> import Elchemy.XString
+      iex> XString.to_float.("123")
+      {:ok, 123.0}
+
+      iex> import Elchemy.XString
+      iex> XString.to_float.("-42")
+      {:ok, -42.0}
+
+      iex> import Elchemy.XString
+      iex> XString.to_float.("3.1")
+      {:ok, 3.1}
+
+      iex> import Elchemy.XString
+      iex> XString.to_float.("31a")
+      {:error, "could not convert string '31a' to a Float"}
+
+  
+  If you are extracting a number from some raw user input, you will typically
+  want to use [`Result.withDefault`](Result#withDefault) to handle bad data:
+  
+      iex> import Elchemy.XString
+      iex> XResult.with_default.(0).(XString.to_float.("42.5"))
+      42.5
+
+      iex> import Elchemy.XString
+      iex> XResult.with_default.(0).(XString.to_float.("cats"))
+      0
+
+  
+  
+  """
+  @spec to_float(String.t) :: {:result, String.t, float}
+  curry to_float/1
+  def to_float(str) do
+    real = if contains().(".").(str) do str else (str ++ ".0") end
+    case to_float_().(real) do
+      {:error, "argument error"} ->
+        {:error, ("could not convert string '" ++ (str ++ "' to a Float"))}
+      e ->
+        e
+    end
+  end
+
+  @spec to_float_(String.t) :: {:result, String.t, float}
+  curryp to_float_/1
+  defp to_float_(a1) do 
+    try_catch fn -> 
+      String.to_float(a1)
+    end
+  end
+  @doc """
+  Convert a string to a list of characters.
+  
+      iex> import Elchemy.XString
+      iex> to_list().("abc")
+      [?a, ?b, ?c]
+
+  
+  
+  """
+  @spec to_list(String.t) :: list(integer)
+  curry to_list/1
+  verify as: String.to_charlist/1
+  def to_list(a1), do: String.to_charlist(a1)
+  @doc """
+  Convert a list of characters into a String. Can be useful if you
+  want to create a string primarily by consing, perhaps for decoding
+  something.
+  
+      iex> import Elchemy.XString
+      iex> from_list().([?a, ?b, ?c])
+      "abc"
+
+  
+  
+  """
+  @spec from_list(list(integer)) :: String.t
+  curry from_list/1
+  def from_list(list) do
+    from_charlist().(list)
+  end
+
+end
+
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XTuple.elm
+# Compiled using Elchemy v0.4.37
+defmodule Elchemy.XTuple do
+  use Elchemy
+
+  @moduledoc """
+ 
+  Module for tuple manipulation
+  
+  @docs first, second, mapFirst, mapSecond
+  
+  """
+  @doc """
+  Extract the first value from a tuple.
+  
+      iex> import Elchemy.XTuple
+      iex> first().({3, 4})
+      3
+
+      iex> import Elchemy.XTuple
+      iex> first().({"john", "doe"})
+      "john"
+
+   
+  """
+  @spec first({any, any}) :: any
+  curry first/1
+  def first({fst, _}) do
+    fst
+  end
+
+  @doc """
+  Extract the second value from a tuple.
+  
+      iex> import Elchemy.XTuple
+      iex> second().({3, 4})
+      4
+
+      iex> import Elchemy.XTuple
+      iex> second().({"john", "doe"})
+      "doe"
+
+   
+  """
+  @spec second({any, any}) :: any
+  curry second/1
+  def second({_, snd}) do
+    snd
+  end
+
+  @doc """
+  Transform the first value in a tuple.
+  
+      iex> import Elchemy.XTuple
+      iex> map_first().(XString.reverse).({"stressed", 16})
+      {"desserts", 16}
+
+      iex> import Elchemy.XTuple
+      iex> map_first().(XString.length).({"stressed", 16})
+      {8, 16}
+
+   
+  """
+  @spec map_first((any -> any), {any, any}) :: {any, any}
+  curry map_first/2
+  def map_first(f, {fst, snd}) do
+    {f.(fst), snd}
+  end
+
+  @doc """
+  Transform the second value in a tuple.
+  
+      iex> import Elchemy.XTuple
+      iex> map_second().(sqrt()).({"stressed", 16})
+      {"stressed", 4.0}
+
+      iex> import Elchemy.XTuple
+      iex> map_second().(fn(x) -> (x + 1) end).({"stressed", 16})
+      {"stressed", 17}
+
+   
+  """
+  @spec map_second((any -> any), {any, any}) :: {any, any}
+  curry map_second/2
+  def map_second(f, {fst, snd}) do
+    {fst, f.(snd)}
+  end
+
+end
