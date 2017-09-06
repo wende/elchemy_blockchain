@@ -1,6 +1,4 @@
-# ElchemyBlockchain
-
-**TODO: Add description**
+# Blockchain implemented with [Elchemy](http://github.com/wende/elchemy)
 
 Output of creating 10 Block-sized chain:
 
