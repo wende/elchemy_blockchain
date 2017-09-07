@@ -21,7 +21,7 @@ hash =
 
 encode : String -> String
 encode =
-    ffi "Base" "encode16"
+    ffi "Base" "encode32"
 
 
 
@@ -33,37 +33,69 @@ type alias Block =
     , timestamp : Int
     , data : String
     , previousHash : String
+    , difficulty : Int
+    , nonce : Int
     , hash : String
     }
 
 
-block : Int -> Int -> String -> String -> Block
-block index timestamp data previousHash =
-    [ toString index, toString timestamp, data, previousHash ]
-        |> List.foldl (++) ""
+findValid : String -> String -> Int -> ( Int, String )
+findValid start subblock nonce =
+    subblock
+        ++ toString nonce
         |> hash Sha256
         |> encode
-        |> Block index timestamp data previousHash
+        |> (\a ->
+                if String.startsWith start a then
+                    Debug.log "Found" ( nonce, a )
+                else
+                    findValid start subblock <| nonce + 1
+           )
+
+
+getHash : Int -> Int -> String -> String -> Int -> ( Int, String )
+getHash index timestamp data previousHash difficulty =
+    let
+        start =
+            String.repeat difficulty "WENDE"
+                |> String.left difficulty
+
+        subblock =
+            toString index
+                ++ toString timestamp
+                ++ data
+                ++ previousHash
+    in
+        findValid start subblock 0
+
+
+block : Int -> Int -> String -> String -> Int -> Block
+block index timestamp data previousHash difficulty =
+    let
+        ( nonce, validHash ) =
+            getHash index timestamp data previousHash difficulty
+    in
+        Block index timestamp data previousHash difficulty nonce validHash
 
 
 genesis : Int -> Block
 genesis now =
-    block 0 now "Genesis Block" "0"
+    block 0 now "Genesis Block" "0" 1
 
 
-new : Int -> String -> List Block -> List Block
-new now data list =
+new : Int -> String -> Int -> List Block -> List Block
+new now data difficulty list =
     case list of
         [] ->
             let
                 g =
                     genesis now
             in
-                block (g.index + 1) now data g.hash :: [ g ]
+                block (g.index + 1) now data g.hash difficulty :: [ g ]
 
         x :: xs ->
-            block (x.index + 1) now data x.hash :: x :: xs
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XBasics.elm
+            block (x.index + 1) now data x.hash difficulty :: x :: xs
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XBasics.elm
 module Elchemy.XBasics
     exposing
         ( Order(..)
@@ -473,7 +505,7 @@ tuple4 a b c d =
 tuple5 : a -> b -> c -> d -> e -> ( a, b, c, d, e )
 tuple5 a b c d e =
     ( a, b, c, d, e )
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XChar.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XChar.elm
 module Elchemy.XChar
     exposing
         ( isUpper
@@ -662,7 +694,7 @@ naiveId1 a b =
 naiveId2 : Int -> Int -> Char
 naiveId2 a b =
     ffi "Kernel" "+"
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XDebug.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XDebug.elm
 module Elchemy.XDebug
     exposing
         ( log
@@ -681,18 +713,25 @@ module Elchemy.XDebug
 import Elchemy exposing (..)
 
 
+type Device
+    = Stdio
+
+
 {-| Log to console in `title: object` format
+
+     log "Title" (1,2,3) == (1,2,3)
+
 -}
 log : String -> a -> a
 log title a =
     let
         _ =
-            puts_ "#{title}:#{inspect a}" []
+            puts_ Stdio "#{title}: #{inspect a}"
     in
         a
 
 
-puts_ : a -> List ( key, val ) -> a
+puts_ : Device -> a -> a
 puts_ =
     ffi "IO" "puts"
 
@@ -708,7 +747,7 @@ costs. Helpful for crashing at not yet implelented functionality
 crash : String -> a
 crash =
     ffi "Kernel" "raise"
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XDict.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XDict.elm
 module Elchemy.XDict
     exposing
         ( Dict
@@ -1022,7 +1061,7 @@ toList dict =
 fromList : List ( comparable, v ) -> Dict comparable v
 fromList assocs =
     List.foldl (\( key, value ) dict -> insert key value dict) empty assocs
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XList.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XList.elm
 module Elchemy.XList
     exposing
         ( isEmpty
@@ -1733,7 +1772,7 @@ sortWith f list =
 sort_ : List a -> (a -> b -> Bool) -> List a
 sort_ =
     ffi "Enum" "sort"
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XMaybe.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XMaybe.elm
 module Elchemy.XMaybe exposing
     ( Maybe(Just, Nothing)
     , andThen
@@ -1896,7 +1935,7 @@ andThen callback maybeValue =
 
         Nothing ->
             Nothing
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XResult.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XResult.elm
 module Elchemy.XResult
     exposing
         ( Result(..)
@@ -2127,7 +2166,7 @@ fromMaybe err maybe =
 
         Nothing ->
             Err err
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XSet.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XSet.elm
 module Elchemy.XSet
     exposing
         ( Set
@@ -2346,7 +2385,7 @@ partition p (Set_elm_builtin d) =
             Dict.partition (\k _ -> p k) d
     in
         ( Set_elm_builtin p1, Set_elm_builtin p2 )
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XString.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XString.elm
 module Elchemy.XString
     exposing
         ( isEmpty
@@ -3090,7 +3129,7 @@ something.
 fromList : List Char -> String
 fromList list =
     fromCharlist list
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XTuple.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XTuple.elm
 module Elchemy.XTuple exposing
     ( first
     , second

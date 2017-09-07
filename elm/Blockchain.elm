@@ -19,7 +19,7 @@ hash =
 
 encode : String -> String
 encode =
-    ffi "Base" "encode16"
+    ffi "Base" "encode32"
 
 
 
@@ -31,33 +31,65 @@ type alias Block =
     , timestamp : Int
     , data : String
     , previousHash : String
+    , difficulty : Int
+    , nonce : Int
     , hash : String
     }
 
 
-block : Int -> Int -> String -> String -> Block
-block index timestamp data previousHash =
-    [ toString index, toString timestamp, data, previousHash ]
-        |> List.foldl (++) ""
+findValid : String -> String -> Int -> ( Int, String )
+findValid start subblock nonce =
+    subblock
+        ++ toString nonce
         |> hash Sha256
         |> encode
-        |> Block index timestamp data previousHash
+        |> (\a ->
+                if String.startsWith start a then
+                    Debug.log "Found" ( nonce, a )
+                else
+                    findValid start subblock <| nonce + 1
+           )
+
+
+getHash : Int -> Int -> String -> String -> Int -> ( Int, String )
+getHash index timestamp data previousHash difficulty =
+    let
+        start =
+            String.repeat difficulty "WENDE"
+                |> String.left difficulty
+
+        subblock =
+            toString index
+                ++ toString timestamp
+                ++ data
+                ++ previousHash
+    in
+        findValid start subblock 0
+
+
+block : Int -> Int -> String -> String -> Int -> Block
+block index timestamp data previousHash difficulty =
+    let
+        ( nonce, validHash ) =
+            getHash index timestamp data previousHash difficulty
+    in
+        Block index timestamp data previousHash difficulty nonce validHash
 
 
 genesis : Int -> Block
 genesis now =
-    block 0 now "Genesis Block" "0"
+    block 0 now "Genesis Block" "0" 1
 
 
-new : Int -> String -> List Block -> List Block
-new now data list =
+new : Int -> String -> Int -> List Block -> List Block
+new now data difficulty list =
     case list of
         [] ->
             let
                 g =
                     genesis now
             in
-                block (g.index + 1) now data g.hash :: [ g ]
+                block (g.index + 1) now data g.hash difficulty :: [ g ]
 
         x :: xs ->
-            block (x.index + 1) now data x.hash :: x :: xs
+            block (x.index + 1) now data x.hash difficulty :: x :: xs

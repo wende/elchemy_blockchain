@@ -11,22 +11,40 @@ defmodule Blockchain do
   def hash(a1, a2), do: :crypto.hash(a1, a2)
   @spec encode(String.t) :: String.t
   curry encode/1
-  verify as: Base.encode16/1
-  def encode(a1), do: Base.encode16(a1)
-  @spec block(integer, integer, String.t, String.t) :: %{
+  verify as: Base.encode32/1
+  def encode(a1), do: Base.encode32(a1)
+  @spec find_valid(String.t, String.t, integer) :: {integer, String.t}
+  curry find_valid/3
+  def find_valid(start, subblock, nonce) do
+    (subblock ++ to_string().(nonce))
+    |> (hash().(:sha256)).()
+    |> (encode()).()
+    |> (fn(a) -> if XString.starts_with.(start).(a) do XDebug.log.("Found").({nonce, a}) else (nonce + 1)
+    |> (find_valid().(start).(subblock)).() end end).()
+  end
+
+  @spec get_hash(integer, integer, String.t, String.t, integer) :: {integer, String.t}
+  curry get_hash/5
+  def get_hash(index, timestamp, data, previous_hash, difficulty) do
+    start = XString.repeat.(difficulty).("WENDE")
+    |> (XString.left.(difficulty)).()
+    subblock = (to_string().(index) ++ (to_string().(timestamp) ++ (data ++ previous_hash)))
+    find_valid().(start).(subblock).(0)
+  end
+
+  @spec block(integer, integer, String.t, String.t, integer) :: %{
     index: integer,
     timestamp: integer,
     data: String.t,
     previousHash: String.t,
+    difficulty: integer,
+    nonce: integer,
     hash: String.t
   }
-  curry block/4
-  def block(index, timestamp, data, previous_hash) do
-    [to_string().(index), to_string().(timestamp), data, previous_hash]
-    |> (XList.foldl.((&++/0).()).("")).()
-    |> (hash().(:sha256)).()
-    |> (encode()).()
-    |> ((fn(arg1) -> fn(arg2) -> fn(arg3) -> fn(arg4) -> fn(arg5) -> %{index: arg1, timestamp: arg2, data: arg3, previousHash: arg4, hash: arg5} end end end end end).(index).(timestamp).(data).(previous_hash)).()
+  curry block/5
+  def block(index, timestamp, data, previous_hash, difficulty) do
+    {nonce, valid_hash} = get_hash().(index).(timestamp).(data).(previous_hash).(difficulty)
+    (fn(arg1) -> fn(arg2) -> fn(arg3) -> fn(arg4) -> fn(arg5) -> fn(arg6) -> fn(arg7) -> %{index: arg1, timestamp: arg2, data: arg3, previousHash: arg4, difficulty: arg5, nonce: arg6, hash: arg7} end end end end end end end).(index).(timestamp).(data).(previous_hash).(difficulty).(nonce).(valid_hash)
   end
 
   @spec genesis(integer) :: %{
@@ -34,40 +52,46 @@ defmodule Blockchain do
     timestamp: integer,
     data: String.t,
     previousHash: String.t,
+    difficulty: integer,
+    nonce: integer,
     hash: String.t
   }
   curry genesis/1
   def genesis(now) do
-    block().(0).(now).("Genesis Block").("0")
+    block().(0).(now).("Genesis Block").("0").(1)
   end
 
-  @spec new(integer, String.t, list(%{
+  @spec new(integer, String.t, integer, list(%{
     index: integer,
     timestamp: integer,
     data: String.t,
     previousHash: String.t,
+    difficulty: integer,
+    nonce: integer,
     hash: String.t
   })) :: list(%{
     index: integer,
     timestamp: integer,
     data: String.t,
     previousHash: String.t,
+    difficulty: integer,
+    nonce: integer,
     hash: String.t
   })
-  curry new/3
-  def new(now, data, list) do
+  curry new/4
+  def new(now, data, difficulty, list) do
     case list do
       [] ->
         g = genesis().(now)
-        [block().((g.index + 1)).(now).(data).(g.hash) | [g]]
+        [block().((g.index + 1)).(now).(data).(g.hash).(difficulty) | [g]]
       [x | xs] ->
-        [block().((x.index + 1)).(now).(data).(x.hash) | [x | xs]]
+        [block().((x.index + 1)).(now).(data).(x.hash).(difficulty) | [x | xs]]
     end
   end
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XBasics.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XBasics.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XBasics do
   use Elchemy
@@ -483,7 +507,7 @@ defmodule Elchemy.XBasics do
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XChar.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XChar.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XChar do
   use Elchemy
@@ -716,7 +740,7 @@ defmodule Elchemy.XChar do
   defp naive_id2(a1, a2), do: Kernel.+(a1, a2)
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XDebug.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XDebug.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XDebug do
   use Elchemy
@@ -731,18 +755,26 @@ defmodule Elchemy.XDebug do
   
   
   """
+  @type device :: :stdio
+
   @doc """
   Log to console in `title: object` format
+  
+      iex> import Elchemy.XDebug
+      iex> log().("Title").({1, 2, 3})
+      {1, 2, 3}
+
+  
   
   """
   @spec log(String.t, any) :: any
   curry log/2
   def log(title, a) do
-    _ = puts_().("#{title}:#{inspect a}").([])
+    _ = puts_().(:stdio).("#{title}: #{inspect a}")
     a
   end
 
-  @spec puts_(any, list({any, any})) :: any
+  @spec puts_(device, any) :: any
   curryp puts_/2
   verify as: IO.puts/2
   defp puts_(a1, a2), do: IO.puts(a1, a2)
@@ -757,7 +789,7 @@ defmodule Elchemy.XDebug do
   def crash(a1), do: Kernel.raise(a1)
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XDict.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XDict.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XDict do
   use Elchemy
@@ -1097,7 +1129,7 @@ defmodule Elchemy.XDict do
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XList.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XList.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XList do
   use Elchemy
@@ -1949,7 +1981,7 @@ defmodule Elchemy.XList do
   defp sort_(a1, a2), do: Enum.sort(a1, fn (x1,x2) -> a2.(x1).(x2) end)
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XMaybe.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XMaybe.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XMaybe do
   use Elchemy
@@ -2128,7 +2160,7 @@ defmodule Elchemy.XMaybe do
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XResult.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XResult.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XResult do
   use Elchemy
@@ -2394,7 +2426,7 @@ defmodule Elchemy.XResult do
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XSet.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XSet.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XSet do
   use Elchemy
@@ -2679,7 +2711,7 @@ defmodule Elchemy.XSet do
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XString.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XString.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XString do
   use Elchemy
@@ -3633,7 +3665,7 @@ defmodule Elchemy.XString do
 
 end
 
->>>>elm-stuff/packages/wende/elchemy-core/0.4.37/elm/Elchemy/XTuple.elm
+>>>>elm-stuff/packages/wende/elchemy-core/0.4.39/elm/Elchemy/XTuple.elm
 # Compiled using Elchemy v0.4.37
 defmodule Elchemy.XTuple do
   use Elchemy
