@@ -1,19 +1,59 @@
-# ElchemyBlockchain
+# Blockchain implemented with [Elchemy](http://github.com/wende/elchemy)
 
-**TODO: Add description**
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `elchemy_blockchain` to your list of dependencies in `mix.exs`:
+Output of creating 10 Block-sized chain:
 
 ```elixir
-def deps do
-  [{:elchemy_blockchain, "~> 0.1.0"}]
-end
+[%{data: "Block #10",
+   hash: "33CB0ECEF9A27AE9F8D431A5A66D7EBD98032BCA5C213ACDB07A4A755B8ACE21",
+   index: 10,
+   previousHash: "E10841E15B181729B2CDB1F1612DD566D1BEE352E5642303B8E937020C956D18",
+   timestamp: 1504712130},
+ %{data: "Block #9",
+   hash: "E10841E15B181729B2CDB1F1612DD566D1BEE352E5642303B8E937020C956D18",
+   index: 9,
+   previousHash: "696A18FBD1994C9B738D293D5AD1A0301580BB021483C65D6DB861F92816F925",
+   timestamp: 1504712130},
+ %{data: "Block #8",
+   hash: "696A18FBD1994C9B738D293D5AD1A0301580BB021483C65D6DB861F92816F925",
+   index: 8,
+   previousHash: "23764A15A10D0C637F97249583E188A4DFDA70357059EF880CD7216C8BF5101E",
+   timestamp: 1504712130},
+ %{data: "Block #7",
+   hash: "23764A15A10D0C637F97249583E188A4DFDA70357059EF880CD7216C8BF5101E",
+   index: 7,
+   previousHash: "531F166263DED7B09119700C9B667AA7D9D1E7AE7A96E816E131434151BB164B",
+   timestamp: 1504712130},
+ %{data: "Block #6",
+   hash: "531F166263DED7B09119700C9B667AA7D9D1E7AE7A96E816E131434151BB164B",
+   index: 6,
+   previousHash: "A32EEFA5A82B35CD0D08B3D57CF1A12B984B6B15FDFA70F425FDA237712D5E46",
+   timestamp: 1504712130},
+ %{data: "Block #5",
+   hash: "A32EEFA5A82B35CD0D08B3D57CF1A12B984B6B15FDFA70F425FDA237712D5E46",
+   index: 5,
+   previousHash: "2F5512CDEE2AED7EFC1C9E12BA424E2ABA99666AB1296707F96CEDFB31F5B883",
+   timestamp: 1504712130},
+ %{data: "Block #4",
+   hash: "2F5512CDEE2AED7EFC1C9E12BA424E2ABA99666AB1296707F96CEDFB31F5B883",
+   index: 4,
+   previousHash: "B2A0E50460565FA07834C08E32C2B7099D028D4310DE03AA037014E430FF9B12",
+   timestamp: 1504712130},
+ %{data: "Block #3",
+   hash: "B2A0E50460565FA07834C08E32C2B7099D028D4310DE03AA037014E430FF9B12",
+   index: 3,
+   previousHash: "BB242B746B7DD5FB484518CF14894960F6BA46BC1A6F500C36203BFA4A2438EB",
+   timestamp: 1504712130},
+ %{data: "Block #2",
+   hash: "BB242B746B7DD5FB484518CF14894960F6BA46BC1A6F500C36203BFA4A2438EB",
+   index: 2,
+   previousHash: "108903C91E781A050508FBD71A973BD14C8B74701D922A7E0E82BE60F109135D",
+   timestamp: 1504712130},
+ %{data: "Block #1",
+   hash: "108903C91E781A050508FBD71A973BD14C8B74701D922A7E0E82BE60F109135D",
+   index: 1,
+   previousHash: "D9A2E24496392987144F6EFCEF06E78818CB1EE0D8191F68BE1B431D12E71C69",
+   timestamp: 1504712130},
+ %{data: "Genesis Block",
+   hash: "D9A2E24496392987144F6EFCEF06E78818CB1EE0D8191F68BE1B431D12E71C69",
+   index: 0, previousHash: "0", timestamp: 1504712130}]
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/elchemy_blockchain](https://hexdocs.pm/elchemy_blockchain).
-
